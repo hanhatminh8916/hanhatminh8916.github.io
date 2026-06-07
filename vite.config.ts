@@ -12,6 +12,6 @@ export default defineConfig({
   },
   nitro: false,
   tanstackStart: {
-    server: false,
+    server: { preset: 'static' },
   },
 });
