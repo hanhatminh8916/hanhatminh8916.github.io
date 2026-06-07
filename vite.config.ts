@@ -7,8 +7,11 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
-  nitro: true,
+  vite: {
+    base: '/Portfolio_Nguyen_Dinh_Truong/',
+  },
+  nitro: false,
   tanstackStart: {
-    server: { entry: "server" },
+    server: false,
   },
 });
