@@ -79,10 +79,10 @@
         top: clamp(92px, 13vh, 142px);
         left: 0;
         z-index: 35;
-        width: clamp(320px, 48vw, 680px);
+        width: clamp(360px, 56vw, 760px);
         pointer-events: none;
         opacity: 0;
-        transform: translate3d(-720px, 0, 0) scale(0.88);
+        transform: translate3d(-820px, 0, 0) scale(0.88);
         filter:
           drop-shadow(0 0 18px rgba(232, 201, 122, 0.58))
           drop-shadow(0 0 30px rgba(56, 189, 248, 0.22))
@@ -107,8 +107,9 @@
         display: block;
         width: 100%;
         height: auto;
-        aspect-ratio: 9 / 4;
+        aspect-ratio: 1 / 1;
         border: 0;
+        background: transparent;
         outline: 0;
       }
 
@@ -1786,7 +1787,7 @@
       @keyframes dragonFlyTop {
         0% {
           opacity: 0;
-          transform: translate3d(-720px, 16px, 0) rotate(-5deg) scale(0.78);
+          transform: translate3d(-820px, 16px, 0) rotate(-5deg) scale(0.78);
         }
 
         12% {
@@ -1804,14 +1805,14 @@
 
         100% {
           opacity: 0;
-          transform: translate3d(calc(100vw + 720px), -12px, 0) rotate(5deg) scale(0.82);
+          transform: translate3d(calc(100vw + 820px), -12px, 0) rotate(5deg) scale(0.82);
         }
       }
 
       @keyframes dragonFlyBottom {
         0% {
           opacity: 0;
-          transform: translate3d(calc(100vw + 720px), 10px, 0) rotate(5deg) scale(-0.8, 0.8);
+          transform: translate3d(calc(100vw + 820px), 10px, 0) rotate(5deg) scale(-0.8, 0.8);
         }
 
         12% {
@@ -1829,7 +1830,7 @@
 
         100% {
           opacity: 0;
-          transform: translate3d(-720px, -8px, 0) rotate(-5deg) scale(-0.82, 0.82);
+          transform: translate3d(-820px, -8px, 0) rotate(-5deg) scale(-0.82, 0.82);
         }
       }
 
@@ -2061,7 +2062,7 @@
       </header>
 
       <div class="dragon-runner" data-dragon aria-hidden="true">
-        <canvas class="dragon-canvas" data-dragon-canvas width="720" height="320"></canvas>
+        <canvas class="dragon-canvas" data-dragon-canvas width="600" height="600"></canvas>
       </div>
 
       <main>
@@ -2920,6 +2921,8 @@
       </footer>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script>
+    <script src="assets/codepen-dragon.js"></script>
     <script>
       const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -2952,523 +2955,18 @@
       const dragon = document.querySelector("[data-dragon]");
       const dragonCanvas = document.querySelector("[data-dragon-canvas]");
 
-      const initCanvasDragon = (canvas) => {
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+      const initReferencedDragon = (canvas) => {
+        if (!window.Processing || !window.daNangDragonSketch) return;
 
-        const width = 720;
-        const height = 320;
-        let tick = 0;
+        if (window.__daNangDragonInstance?.exit) {
+          window.__daNangDragonInstance.exit();
+        }
 
-        canvas.width = width;
-        canvas.height = height;
-
-        const drawSmoothPath = (points, strokeStyle, lineWidth, shadow = null) => {
-          ctx.save();
-          ctx.lineCap = "round";
-          ctx.lineJoin = "round";
-          ctx.strokeStyle = strokeStyle;
-          ctx.lineWidth = lineWidth;
-
-          if (shadow) {
-            ctx.shadowColor = shadow.color;
-            ctx.shadowBlur = shadow.blur;
-          }
-
-          ctx.beginPath();
-          ctx.moveTo(points[0].x, points[0].y);
-          for (let i = 1; i < points.length - 2; i += 1) {
-            const midX = (points[i].x + points[i + 1].x) / 2;
-            const midY = (points[i].y + points[i + 1].y) / 2;
-            ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
-          }
-          const last = points[points.length - 1];
-          ctx.lineTo(last.x, last.y);
-          ctx.stroke();
-          ctx.restore();
-        };
-
-        const drawTriangle = (a, b, c, fillStyle, strokeStyle = null) => {
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.lineTo(c.x, c.y);
-          ctx.closePath();
-          ctx.fillStyle = fillStyle;
-          ctx.fill();
-          if (strokeStyle) {
-            ctx.strokeStyle = strokeStyle;
-            ctx.lineWidth = 1.2;
-            ctx.stroke();
-          }
-        };
-
-        const drawWing = (root, flap, behind = true) => {
-          const side = behind ? -1 : 1;
-          const lift = flap * (behind ? 36 : 46);
-          const tip = { x: root.x - 78, y: root.y - 112 - lift * side };
-          const far = { x: root.x + 92, y: root.y - 70 - lift };
-          const lower = { x: root.x + 58, y: root.y + 16 + lift * 0.16 };
-
-          ctx.save();
-          ctx.globalAlpha = behind ? 0.58 : 0.76;
-          ctx.fillStyle = behind ? "rgba(148, 46, 33, 0.58)" : "rgba(201, 169, 110, 0.62)";
-          ctx.strokeStyle = behind ? "rgba(248, 243, 232, 0.28)" : "rgba(248, 243, 232, 0.46)";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(root.x, root.y);
-          ctx.bezierCurveTo(root.x - 28, root.y - 42, tip.x + 26, tip.y - 20, tip.x, tip.y);
-          ctx.bezierCurveTo(tip.x + 78, tip.y + 30, far.x - 24, far.y - 6, far.x, far.y);
-          ctx.bezierCurveTo(root.x + 78, root.y - 16, lower.x + 18, lower.y, root.x, root.y);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.strokeStyle = "rgba(248, 243, 232, 0.3)";
-          ctx.lineWidth = 1.2;
-          [0.22, 0.42, 0.62, 0.82].forEach((ratio) => {
-            ctx.beginPath();
-            ctx.moveTo(root.x, root.y);
-            ctx.lineTo(root.x + (far.x - root.x) * ratio, root.y + (far.y - root.y) * ratio - 18 * Math.sin(ratio * Math.PI));
-            ctx.stroke();
-          });
-          ctx.restore();
-        };
-
-        const drawLeg = (root, phase) => {
-          ctx.save();
-          ctx.strokeStyle = "rgba(143, 72, 43, 0.92)";
-          ctx.lineWidth = 8;
-          ctx.lineCap = "round";
-          ctx.beginPath();
-          ctx.moveTo(root.x, root.y + 12);
-          ctx.quadraticCurveTo(root.x - 4, root.y + 42 + Math.sin(phase) * 8, root.x - 28, root.y + 58);
-          ctx.stroke();
-          ctx.lineWidth = 5;
-          ctx.beginPath();
-          ctx.moveTo(root.x - 28, root.y + 58);
-          ctx.lineTo(root.x - 45, root.y + 54);
-          ctx.moveTo(root.x - 28, root.y + 58);
-          ctx.lineTo(root.x - 36, root.y + 70);
-          ctx.stroke();
-          ctx.restore();
-        };
-
-        const drawDragon = () => {
-          tick += 0.018;
-          ctx.clearRect(0, 0, width, height);
-
-          const points = [];
-          for (let i = 0; i < 32; i += 1) {
-            const t = i / 31;
-            points.push({
-              x: 604 - t * 510,
-              y:
-                158 +
-                Math.sin(t * Math.PI * 3.35 + tick * 2.2) * 30 +
-                Math.sin(t * 11 + tick * 4.3) * 5
-            });
-          }
-
-          const bodyGradient = ctx.createLinearGradient(90, 0, 620, 0);
-          bodyGradient.addColorStop(0, "#5b0f0f");
-          bodyGradient.addColorStop(0.34, "#8f1d17");
-          bodyGradient.addColorStop(0.7, "#c9a96e");
-          bodyGradient.addColorStop(1, "#fff7d8");
-
-          drawWing(points[10], Math.sin(tick * 8.5), true);
-
-          drawSmoothPath(points, bodyGradient, 36, { color: "rgba(232, 201, 122, 0.55)", blur: 18 });
-          drawSmoothPath(points, "rgba(255, 247, 216, 0.74)", 8);
-          drawSmoothPath(points, "rgba(56, 189, 248, 0.22)", 3);
-
-          drawWing(points[10], Math.sin(tick * 8.5), false);
-
-          for (let i = 3; i < points.length - 4; i += 2) {
-            const prev = points[i - 1];
-            const curr = points[i];
-            const next = points[i + 1];
-            const dx = next.x - prev.x;
-            const dy = next.y - prev.y;
-            const len = Math.hypot(dx, dy) || 1;
-            let nx = -dy / len;
-            let ny = dx / len;
-            if (ny > 0) {
-              nx *= -1;
-              ny *= -1;
-            }
-            const tx = dx / len;
-            const ty = dy / len;
-            const size = 15 - i * 0.18;
-            drawTriangle(
-              { x: curr.x - tx * 7, y: curr.y - ty * 7 },
-              { x: curr.x + tx * 7, y: curr.y + ty * 7 },
-              { x: curr.x + nx * size, y: curr.y + ny * size },
-              i % 4 === 1 ? "#fff7d8" : "#c9a96e",
-              "rgba(5, 13, 26, 0.28)"
-            );
-          }
-
-          drawLeg(points[9], tick * 4);
-          drawLeg(points[14], tick * 4 + Math.PI * 0.8);
-
-          const tail = points[points.length - 1];
-          drawTriangle(
-            { x: tail.x - 8, y: tail.y },
-            { x: tail.x - 44, y: tail.y - 18 },
-            { x: tail.x - 34, y: tail.y + 24 },
-            "#c9a96e",
-            "rgba(248, 243, 232, 0.4)"
-          );
-
-          const head = points[0];
-          ctx.save();
-          ctx.translate(head.x + 14, head.y);
-          ctx.rotate(Math.sin(tick * 3) * 0.05);
-
-          const flame = 0.85 + Math.sin(tick * 18) * 0.15;
-          ctx.save();
-          ctx.translate(46, 2);
-          ctx.scale(flame, 1 + (1 - flame) * 0.4);
-          const flameGradient = ctx.createLinearGradient(0, 0, 92, 0);
-          flameGradient.addColorStop(0, "#fff7d8");
-          flameGradient.addColorStop(0.48, "#e8c97a");
-          flameGradient.addColorStop(1, "#f97316");
-          ctx.fillStyle = flameGradient;
-          ctx.globalAlpha = 0.9;
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.bezierCurveTo(32, -22, 58, -18, 88, -4);
-          ctx.bezierCurveTo(58, 6, 34, 20, 0, 8);
-          ctx.closePath();
-          ctx.fill();
-          ctx.restore();
-
-          ctx.fillStyle = "#c9a96e";
-          ctx.strokeStyle = "rgba(255, 247, 216, 0.82)";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.ellipse(8, 0, 38, 28, 0.08, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.fillStyle = "#fff7d8";
-          drawTriangle({ x: -10, y: -21 }, { x: 2, y: -58 }, { x: 12, y: -19 }, "#fff7d8", "#c9a96e");
-          drawTriangle({ x: 18, y: -17 }, { x: 38, y: -48 }, { x: 38, y: -8 }, "#fff7d8", "#c9a96e");
-
-          ctx.fillStyle = "#07111f";
-          ctx.beginPath();
-          ctx.arc(20, -7, 4, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#fff7d8";
-          ctx.beginPath();
-          ctx.arc(21.5, -8.5, 1.4, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.strokeStyle = "#6b3c1f";
-          ctx.lineWidth = 3;
-          ctx.lineCap = "round";
-          ctx.beginPath();
-          ctx.moveTo(22, 14);
-          ctx.quadraticCurveTo(8, 22, -10, 15);
-          ctx.stroke();
-
-          ctx.strokeStyle = "#a5f3fc";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(-4, 8);
-          ctx.bezierCurveTo(-34, 14, -46, 32, -60, 50 + Math.sin(tick * 4) * 4);
-          ctx.moveTo(4, 18);
-          ctx.bezierCurveTo(-22, 36, -28, 54, -38, 76 + Math.cos(tick * 4) * 4);
-          ctx.stroke();
-          ctx.restore();
-
-          for (let i = 0; i < 10; i += 1) {
-            const emberPhase = (tick * 2.4 + i * 0.33) % 1;
-            const x = head.x + 80 + emberPhase * 78;
-            const y = head.y + Math.sin(i * 1.7 + tick * 8) * 22;
-            ctx.globalAlpha = 1 - emberPhase;
-            ctx.fillStyle = i % 2 ? "#a5f3fc" : "#e8c97a";
-            ctx.beginPath();
-            ctx.arc(x, y, 2.8 + (i % 3), 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1;
-          }
-
-          requestAnimationFrame(drawDragon);
-        };
-
-        drawDragon();
-      };
-
-      const initProcessingStyleDragon = (canvas) => {
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-
-        const width = 720;
-        const height = 320;
-        let tick = 0;
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ellipseAt = (point, rx, ry, angle, fillStyle, strokeStyle = null, lineWidth = 1) => {
-          ctx.save();
-          ctx.translate(point.x, point.y);
-          ctx.rotate(angle);
-          ctx.beginPath();
-          ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
-          ctx.fillStyle = fillStyle;
-          ctx.fill();
-          if (strokeStyle) {
-            ctx.strokeStyle = strokeStyle;
-            ctx.lineWidth = lineWidth;
-            ctx.stroke();
-          }
-          ctx.restore();
-        };
-
-        const triangle = (a, b, c, fillStyle, strokeStyle = null) => {
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.lineTo(c.x, c.y);
-          ctx.closePath();
-          ctx.fillStyle = fillStyle;
-          ctx.fill();
-          if (strokeStyle) {
-            ctx.strokeStyle = strokeStyle;
-            ctx.lineWidth = 1.4;
-            ctx.stroke();
-          }
-        };
-
-        const curve = (points, style, widthValue, alpha = 1) => {
-          ctx.save();
-          ctx.globalAlpha = alpha;
-          ctx.strokeStyle = style;
-          ctx.lineWidth = widthValue;
-          ctx.lineCap = "round";
-          ctx.lineJoin = "round";
-          ctx.beginPath();
-          ctx.moveTo(points[0].x, points[0].y);
-          for (let i = 1; i < points.length - 2; i += 1) {
-            const midX = (points[i].x + points[i + 1].x) / 2;
-            const midY = (points[i].y + points[i + 1].y) / 2;
-            ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
-          }
-          ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
-          ctx.stroke();
-          ctx.restore();
-        };
-
-        const drawWing = (root, flap) => {
-          const lift = Math.sin(flap) * 34;
-          const base = { x: root.x - 4, y: root.y + 4 };
-          const tip = { x: root.x - 122, y: root.y - 104 - lift };
-          const top = { x: root.x - 24, y: root.y - 72 - lift * 0.45 };
-          const far = { x: root.x + 108, y: root.y - 60 + lift * 0.2 };
-          const lower = { x: root.x + 72, y: root.y + 24 + lift * 0.18 };
-
-          ctx.save();
-          ctx.globalAlpha = 0.78;
-          ctx.fillStyle = "rgba(106, 22, 25, 0.7)";
-          ctx.strokeStyle = "rgba(255, 247, 216, 0.42)";
-          ctx.lineWidth = 2.4;
-          ctx.beginPath();
-          ctx.moveTo(base.x, base.y);
-          ctx.bezierCurveTo(root.x - 56, root.y - 42, top.x - 28, top.y - 36, tip.x, tip.y);
-          ctx.bezierCurveTo(tip.x + 74, tip.y + 18, far.x - 36, far.y - 12, far.x, far.y);
-          ctx.bezierCurveTo(root.x + 80, root.y - 2, lower.x + 12, lower.y, base.x, base.y);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.strokeStyle = "rgba(248, 243, 232, 0.28)";
-          ctx.lineWidth = 1.2;
-          [0.18, 0.36, 0.54, 0.72, 0.9].forEach((ratio) => {
-            ctx.beginPath();
-            ctx.moveTo(base.x, base.y);
-            ctx.lineTo(
-              tip.x + (far.x - tip.x) * ratio,
-              tip.y + (far.y - tip.y) * ratio + Math.sin(ratio * Math.PI) * 18
-            );
-            ctx.stroke();
-          });
-          ctx.restore();
-        };
-
-        const drawClaw = (root, phase, front = true) => {
-          ctx.save();
-          ctx.strokeStyle = front ? "rgba(112, 47, 31, 0.96)" : "rgba(92, 40, 30, 0.8)";
-          ctx.lineWidth = front ? 8 : 6;
-          ctx.lineCap = "round";
-          ctx.beginPath();
-          ctx.moveTo(root.x, root.y + 10);
-          ctx.bezierCurveTo(root.x - 4, root.y + 38, root.x - 24, root.y + 48 + Math.sin(phase) * 8, root.x - 45, root.y + 56);
-          ctx.stroke();
-
-          ctx.strokeStyle = "rgba(255, 247, 216, 0.84)";
-          ctx.lineWidth = 2.2;
-          for (let i = 0; i < 3; i += 1) {
-            ctx.beginPath();
-            ctx.moveTo(root.x - 42, root.y + 56);
-            ctx.lineTo(root.x - 57 - i * 4, root.y + 52 + i * 9);
-            ctx.stroke();
-          }
-          ctx.restore();
-        };
-
-        const drawProcessingDragon = () => {
-          tick += 0.018;
-          ctx.clearRect(0, 0, width, height);
-
-          const points = [];
-          for (let i = 0; i < 36; i += 1) {
-            const t = i / 35;
-            points.push({
-              x: 606 - t * 520,
-              y: 160 + Math.sin(t * Math.PI * 3.1 + tick * 2.25) * 36 + Math.sin(t * 18 + tick * 3.6) * 5,
-              t
-            });
-          }
-
-          ctx.save();
-          ctx.shadowColor = "rgba(232, 201, 122, 0.5)";
-          ctx.shadowBlur = 22;
-          curve(points, "rgba(232, 201, 122, 0.24)", 54, 0.65);
-          ctx.restore();
-
-          drawWing(points[10], tick * 8.4);
-
-          const bodyGradient = ctx.createLinearGradient(80, 0, 620, 0);
-          bodyGradient.addColorStop(0, "#4b0d14");
-          bodyGradient.addColorStop(0.34, "#8f1517");
-          bodyGradient.addColorStop(0.68, "#b76431");
-          bodyGradient.addColorStop(1, "#e8c97a");
-          curve(points, bodyGradient, 27);
-          curve(points, "rgba(255, 247, 216, 0.82)", 6, 0.85);
-
-          for (let i = points.length - 1; i >= 2; i -= 1) {
-            const p = points[i];
-            const prev = points[Math.max(0, i - 1)];
-            const next = points[Math.min(points.length - 1, i + 1)];
-            const angle = Math.atan2(next.y - prev.y, next.x - prev.x);
-            const radius = 13 + (1 - p.t) * 6;
-            const shade = i % 2 === 0 ? "rgba(143, 21, 23, 0.7)" : "rgba(201, 169, 110, 0.32)";
-            ellipseAt(p, radius * 0.88, radius * 0.42, angle, shade);
-          }
-
-          for (let i = 4; i < points.length - 4; i += 2) {
-            const p = points[i];
-            const prev = points[i - 1];
-            const next = points[i + 1];
-            const angle = Math.atan2(next.y - prev.y, next.x - prev.x) - Math.PI / 2;
-            const size = 18 - i * 0.22;
-            const baseA = { x: p.x + Math.cos(angle + Math.PI / 2) * 8, y: p.y + Math.sin(angle + Math.PI / 2) * 8 };
-            const baseB = { x: p.x + Math.cos(angle - Math.PI / 2) * 8, y: p.y + Math.sin(angle - Math.PI / 2) * 8 };
-            const tip = { x: p.x + Math.cos(angle) * size, y: p.y + Math.sin(angle) * size };
-            triangle(baseA, baseB, tip, i % 4 === 0 ? "#fff7d8" : "#c9a96e", "rgba(5, 13, 26, 0.22)");
-          }
-
-          drawClaw(points[11], tick * 5, false);
-          drawClaw(points[16], tick * 5 + Math.PI, true);
-
-          const tail = points[points.length - 1];
-          triangle(
-            { x: tail.x - 2, y: tail.y },
-            { x: tail.x - 48, y: tail.y - 20 },
-            { x: tail.x - 36, y: tail.y + 26 },
-            "#d5b16e",
-            "rgba(255, 247, 216, 0.5)"
-          );
-
-          const head = points[0];
-          ctx.save();
-          ctx.translate(head.x + 18, head.y);
-          ctx.rotate(Math.sin(tick * 3.2) * 0.05);
-
-          const flamePulse = 0.9 + Math.sin(tick * 18) * 0.12;
-          const flameGradient = ctx.createLinearGradient(36, 0, 134, 0);
-          flameGradient.addColorStop(0, "#fff7d8");
-          flameGradient.addColorStop(0.45, "#e8c97a");
-          flameGradient.addColorStop(1, "#ef4444");
-          ctx.save();
-          ctx.scale(flamePulse, 1);
-          ctx.fillStyle = flameGradient;
-          ctx.globalAlpha = 0.9;
-          ctx.beginPath();
-          ctx.moveTo(44, -2);
-          ctx.bezierCurveTo(74, -28, 110, -22, 142, -4);
-          ctx.bezierCurveTo(108, 8, 82, 24, 44, 10);
-          ctx.closePath();
-          ctx.fill();
-          ctx.restore();
-
-          ctx.fillStyle = "#d6a24f";
-          ctx.strokeStyle = "rgba(255, 247, 216, 0.86)";
-          ctx.lineWidth = 2.4;
-          ctx.beginPath();
-          ctx.moveTo(-25, -6);
-          ctx.bezierCurveTo(-18, -31, 20, -39, 44, -24);
-          ctx.lineTo(66, -6);
-          ctx.lineTo(42, 20);
-          ctx.bezierCurveTo(16, 32, -17, 23, -30, 2);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-
-          triangle({ x: -10, y: -28 }, { x: 4, y: -70 }, { x: 18, y: -29 }, "#fff7d8", "#c9a96e");
-          triangle({ x: 30, y: -24 }, { x: 57, y: -58 }, { x: 50, y: -16 }, "#fff7d8", "#c9a96e");
-          triangle({ x: 50, y: 4 }, { x: 72, y: -4 }, { x: 50, y: 14 }, "#fff7d8", "#c9a96e");
-
-          ctx.fillStyle = "#06111f";
-          ctx.beginPath();
-          ctx.arc(28, -9, 4.5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#fff7d8";
-          ctx.beginPath();
-          ctx.arc(29.5, -10.5, 1.4, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.strokeStyle = "#6b2f1f";
-          ctx.lineWidth = 3.2;
-          ctx.lineCap = "round";
-          ctx.beginPath();
-          ctx.moveTo(36, 14);
-          ctx.quadraticCurveTo(20, 27, -4, 16);
-          ctx.stroke();
-
-          ctx.strokeStyle = "#a5f3fc";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(-6, 8);
-          ctx.bezierCurveTo(-42, 15, -60, 44, -78, 64 + Math.sin(tick * 4) * 5);
-          ctx.moveTo(6, 19);
-          ctx.bezierCurveTo(-22, 42, -32, 70, -42, 94 + Math.cos(tick * 4) * 5);
-          ctx.stroke();
-          ctx.restore();
-
-          for (let i = 0; i < 14; i += 1) {
-            const phase = (tick * 2.6 + i * 0.21) % 1;
-            const emberX = head.x + 96 + phase * 112;
-            const emberY = head.y + Math.sin(i * 1.4 + tick * 8.5) * 28;
-            ctx.globalAlpha = 1 - phase;
-            ctx.fillStyle = i % 3 === 0 ? "#a5f3fc" : i % 2 ? "#e8c97a" : "#ef4444";
-            ctx.beginPath();
-            ctx.arc(emberX, emberY, 2 + (i % 4), 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1;
-          }
-
-          requestAnimationFrame(drawProcessingDragon);
-        };
-
-        drawProcessingDragon();
+        window.__daNangDragonInstance = new window.Processing(canvas, window.daNangDragonSketch);
       };
 
       if (!prefersReducedMotion && dragonCanvas) {
-        initProcessingStyleDragon(dragonCanvas);
+        initReferencedDragon(dragonCanvas);
       }
 
       if (!prefersReducedMotion && dragon) {
@@ -3476,6 +2974,7 @@
 
         const playDragonFlight = (mode = "top") => {
           dragon.classList.remove("is-flying-top", "is-flying-bottom", "dragon-runner--bottom");
+          window.__resetDaNangDragon?.();
 
           if (mode === "bottom") {
             dragon.classList.add("dragon-runner--bottom");
