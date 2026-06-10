@@ -2,7 +2,7 @@
 // The page owns the fly-by motion; this sketch only draws the animated dragon.
 window.daNangDragonSketch = function(processingInstance) {
      with (processingInstance) {
-        size(600, 600); 
+        size(760, 600); 
        
         frameRate(60);
        
