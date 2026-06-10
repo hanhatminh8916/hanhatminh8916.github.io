@@ -1,0 +1,4313 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Trang trải nghiệm single-page về thành phố Đà Nẵng sau sáp nhập hành chính 2025."
+    />
+    <title>Đà Nẵng | Việt Nam Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-ink: #f8f3e8;
+        --color-muted: #c8d2dd;
+        --color-navy-950: #050d1a;
+        --color-navy-900: #0a1628;
+        --color-navy-800: #102642;
+        --color-navy-700: #1a3a5c;
+        --color-cyan: #38bdf8;
+        --color-cyan-bright: #a5f3fc;
+        --color-cyan-deep: #0ea5e9;
+        --color-gold: #c9a96e;
+        --color-gold-bright: #e8c97a;
+        --color-line: rgba(248, 243, 232, 0.18);
+        --font-display: "Cormorant Garamond", Georgia, serif;
+        --font-body: "DM Sans", Arial, sans-serif;
+        --shadow-gold: 0 0 34px rgba(201, 169, 110, 0.36);
+        --container: min(1180px, calc(100vw - 32px));
+        --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        background: var(--color-navy-950);
+      }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+        color: var(--color-ink);
+        font-family: var(--font-body);
+        background:
+          radial-gradient(circle at top left, rgba(201, 169, 110, 0.16), transparent 34rem),
+          linear-gradient(180deg, var(--color-navy-900), var(--color-navy-950));
+      }
+
+      body::selection {
+        color: var(--color-navy-950);
+        background: var(--color-gold-bright);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
+      .site-shell {
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .dragon-runner {
+        position: fixed;
+        top: clamp(92px, 13vh, 142px);
+        left: 0;
+        z-index: 35;
+        width: clamp(320px, 48vw, 680px);
+        pointer-events: none;
+        opacity: 0;
+        transform: translate3d(-720px, 0, 0) scale(0.88);
+        filter:
+          drop-shadow(0 0 18px rgba(232, 201, 122, 0.58))
+          drop-shadow(0 0 30px rgba(56, 189, 248, 0.22))
+          drop-shadow(0 24px 34px rgba(0, 0, 0, 0.28));
+        will-change: transform, opacity;
+      }
+
+      .dragon-runner--bottom {
+        top: auto;
+        bottom: clamp(82px, 12vh, 142px);
+      }
+
+      .dragon-runner.is-flying-top {
+        animation: dragonFlyTop 7.2s var(--ease) both;
+      }
+
+      .dragon-runner.is-flying-bottom {
+        animation: dragonFlyBottom 7.4s var(--ease) both;
+      }
+
+      .dragon-canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 9 / 4;
+        border: 0;
+        outline: 0;
+      }
+
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 20;
+        width: 100%;
+        border-bottom: 1px solid rgba(248, 243, 232, 0.12);
+        background: linear-gradient(180deg, rgba(5, 13, 26, 0.7), rgba(5, 13, 26, 0));
+        backdrop-filter: blur(14px);
+      }
+
+      .topbar__inner {
+        width: var(--container);
+        height: 72px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+
+      .brand__mark {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: var(--color-gold);
+        box-shadow: var(--shadow-gold);
+      }
+
+      .nav {
+        display: none;
+        align-items: center;
+        gap: clamp(14px, 2vw, 28px);
+        color: rgba(248, 243, 232, 0.78);
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .nav a {
+        position: relative;
+      }
+
+      .nav a::after {
+        position: absolute;
+        left: 0;
+        bottom: -10px;
+        width: 100%;
+        height: 1px;
+        content: "";
+        background: var(--color-gold);
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 260ms var(--ease);
+      }
+
+      .nav a:hover::after,
+      .nav a:focus-visible::after {
+        transform: scaleX(1);
+        transform-origin: left;
+      }
+
+      .hero {
+        position: relative;
+        isolation: isolate;
+        min-height: 100svh;
+        display: grid;
+        align-items: end;
+        overflow: hidden;
+        padding: 112px 0 54px;
+      }
+
+      .hero__image {
+        position: absolute;
+        inset: -8vh 0;
+        z-index: -3;
+        background-image: url("https://danangfantasticity.com/wp-content/uploads/2018/10/cau-rong-top-20-cay-cau-ky-quai-nhat-the-gioi-theo-boredom-therapy.jpg");
+        background-position: center;
+        background-size: cover;
+        transform: translate3d(0, var(--hero-shift, 0px), 0) scale(1.05);
+        will-change: transform;
+      }
+
+      .hero::before {
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+        content: "";
+        background:
+          linear-gradient(90deg, rgba(5, 13, 26, 0.92) 0%, rgba(10, 22, 40, 0.72) 42%, rgba(10, 22, 40, 0.24) 100%),
+          linear-gradient(180deg, rgba(5, 13, 26, 0.2) 0%, rgba(5, 13, 26, 0.48) 58%, #050d1a 100%);
+      }
+
+      .hero::after {
+        position: absolute;
+        inset: auto 0 0;
+        z-index: -1;
+        height: 36vh;
+        content: "";
+        background: linear-gradient(180deg, rgba(5, 13, 26, 0), var(--color-navy-950));
+      }
+
+      .hero__inner {
+        width: var(--container);
+        margin: 0 auto;
+        display: grid;
+        gap: 36px;
+      }
+
+      .hero__kicker {
+        max-width: 14rem;
+        display: grid;
+        gap: 14px;
+        color: rgba(248, 243, 232, 0.78);
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.24em;
+        line-height: 1.65;
+        text-transform: uppercase;
+      }
+
+      .hero__kicker::before {
+        width: 74px;
+        height: 1px;
+        content: "";
+        background: var(--color-gold);
+        box-shadow: var(--shadow-gold);
+      }
+
+      .hero__content {
+        max-width: 920px;
+      }
+
+      .hero__title {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: clamp(3.6rem, 18vw, 7.5rem);
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        line-height: 0.78;
+        text-transform: uppercase;
+        text-wrap: balance;
+        white-space: nowrap;
+        text-shadow: 0 22px 60px rgba(0, 0, 0, 0.52);
+      }
+
+      .hero__subtitle {
+        max-width: 720px;
+        margin: 24px 0 0;
+        color: rgba(248, 243, 232, 0.9);
+        font-family: var(--font-display);
+        font-size: clamp(1.8rem, 7vw, 3.5rem);
+        font-weight: 500;
+        line-height: 0.98;
+      }
+
+      .hero__badge {
+        width: fit-content;
+        max-width: 100%;
+        margin-top: 24px;
+        padding: 10px 14px;
+        border: 1px solid rgba(201, 169, 110, 0.48);
+        border-radius: 999px;
+        color: var(--color-gold-bright);
+        background: rgba(5, 13, 26, 0.48);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        line-height: 1.4;
+        text-transform: uppercase;
+      }
+
+      .hero__meta {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        max-width: 780px;
+      }
+
+      .meta-item {
+        min-height: 88px;
+        padding: 18px 0 0;
+        border-top: 1px solid var(--color-line);
+      }
+
+      .meta-item__value {
+        display: block;
+        color: var(--color-gold-bright);
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .meta-item__label {
+        display: block;
+        margin-top: 7px;
+        color: var(--color-muted);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        line-height: 1.5;
+        text-transform: uppercase;
+      }
+
+      .scroll-cue {
+        position: absolute;
+        right: 24px;
+        bottom: 26px;
+        width: 40px;
+        height: 64px;
+        display: grid;
+        place-items: center;
+        color: var(--color-gold);
+        opacity: 0.88;
+        animation: cuePulse 1.8s var(--ease) infinite;
+      }
+
+      .scroll-cue::before {
+        width: 1px;
+        height: 42px;
+        content: "";
+        background: linear-gradient(180deg, rgba(201, 169, 110, 0), var(--color-gold));
+      }
+
+      .scroll-cue::after {
+        position: absolute;
+        bottom: 0;
+        width: 9px;
+        height: 9px;
+        border-right: 1px solid var(--color-gold);
+        border-bottom: 1px solid var(--color-gold);
+        content: "";
+        transform: rotate(45deg);
+      }
+
+      .section {
+        position: relative;
+        padding: clamp(76px, 10vw, 148px) 0;
+      }
+
+      .section__inner {
+        width: var(--container);
+        margin: 0 auto;
+      }
+
+      .section-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 18px;
+        color: var(--color-gold-bright);
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        line-height: 1.5;
+        text-transform: uppercase;
+      }
+
+      .section-label::before {
+        width: 44px;
+        height: 1px;
+        content: "";
+        background: currentColor;
+      }
+
+      .section-title {
+        margin: 0;
+        color: var(--color-ink);
+        font-family: var(--font-display);
+        font-size: clamp(2.8rem, 13vw, 5.7rem);
+        font-weight: 600;
+        letter-spacing: 0;
+        line-height: 0.92;
+        text-wrap: balance;
+      }
+
+      .overview {
+        isolation: isolate;
+        overflow: hidden;
+        background:
+          linear-gradient(90deg, rgba(201, 169, 110, 0.08), transparent 34%),
+          linear-gradient(180deg, var(--color-navy-950) 0%, var(--color-navy-900) 58%, #07111f 100%);
+      }
+
+      .overview__grid {
+        display: grid;
+        gap: 42px;
+        align-items: center;
+      }
+
+      .overview__copy {
+        max-width: 680px;
+      }
+
+      .overview__lead {
+        margin: 24px 0 0;
+        color: rgba(248, 243, 232, 0.86);
+        font-family: var(--font-display);
+        font-size: clamp(1.55rem, 6vw, 2.5rem);
+        font-weight: 500;
+        line-height: 1.12;
+      }
+
+      .overview__body {
+        display: grid;
+        gap: 16px;
+        margin-top: 28px;
+        color: var(--color-muted);
+        font-size: 1rem;
+        line-height: 1.85;
+      }
+
+      .overview__body p {
+        margin: 0;
+      }
+
+      .overview__narration {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px 16px;
+        margin-top: 28px;
+        padding: 14px 0 0;
+        border-top: 1px solid rgba(201, 169, 110, 0.3);
+      }
+
+      .narration-button {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 0 18px;
+        border: 1px solid rgba(201, 169, 110, 0.5);
+        border-radius: 8px;
+        color: var(--color-navy-950);
+        background: linear-gradient(135deg, var(--color-gold), var(--color-gold-bright));
+        box-shadow: 0 14px 34px rgba(201, 169, 110, 0.2);
+        font: inherit;
+        font-size: 0.8rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        line-height: 1;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition:
+          transform 220ms var(--ease),
+          box-shadow 220ms var(--ease),
+          filter 220ms var(--ease);
+      }
+
+      .narration-button:hover,
+      .narration-button:focus-visible {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 44px rgba(201, 169, 110, 0.32);
+        filter: brightness(1.05);
+      }
+
+      .narration-button:disabled {
+        color: rgba(248, 243, 232, 0.48);
+        background: rgba(248, 243, 232, 0.08);
+        box-shadow: none;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .narration-button__icon {
+        width: 18px;
+        display: inline-grid;
+        place-items: center;
+        font-size: 0.95rem;
+        line-height: 1;
+      }
+
+      .narration-status {
+        min-height: 22px;
+        color: rgba(248, 243, 232, 0.62);
+        font-size: 0.82rem;
+        font-weight: 700;
+        line-height: 1.55;
+      }
+
+      .overview__facts {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-top: 34px;
+      }
+
+      .fact-row {
+        min-height: 92px;
+        padding: 18px 0 0;
+        border-top: 1px solid var(--color-line);
+      }
+
+      .fact-row__value {
+        display: block;
+        color: var(--color-gold-bright);
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 8vw, 3.25rem);
+        font-weight: 700;
+        line-height: 0.95;
+      }
+
+      .fact-row__label {
+        display: block;
+        margin-top: 9px;
+        color: rgba(248, 243, 232, 0.72);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        line-height: 1.55;
+        text-transform: uppercase;
+      }
+
+      .overview__media {
+        position: relative;
+      }
+
+      .overview__image-wrap {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(201, 169, 110, 0.38);
+        border-radius: 4px;
+        aspect-ratio: 4 / 5;
+        background: var(--color-navy-800);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.42);
+      }
+
+      .overview__image-wrap::after {
+        position: absolute;
+        inset: 0;
+        content: "";
+        background:
+          linear-gradient(180deg, rgba(5, 13, 26, 0.04), rgba(5, 13, 26, 0.54)),
+          linear-gradient(90deg, rgba(201, 169, 110, 0.14), rgba(201, 169, 110, 0));
+        pointer-events: none;
+      }
+
+      .overview__image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scale(1.02);
+      }
+
+      .overview__caption {
+        position: absolute;
+        right: -1px;
+        bottom: -1px;
+        max-width: min(320px, 86%);
+        padding: 18px 20px;
+        border-top: 1px solid rgba(201, 169, 110, 0.42);
+        border-left: 1px solid rgba(201, 169, 110, 0.42);
+        color: rgba(248, 243, 232, 0.86);
+        background: rgba(5, 13, 26, 0.82);
+        backdrop-filter: blur(14px);
+        font-size: 0.82rem;
+        line-height: 1.7;
+      }
+
+      .overview__timeline {
+        display: grid;
+        gap: 0;
+        margin: 28px 0 0;
+        border-top: 1px solid var(--color-line);
+      }
+
+      .timeline-item {
+        display: grid;
+        grid-template-columns: 74px minmax(0, 1fr);
+        gap: 18px;
+        padding: 17px 0;
+        border-bottom: 1px solid var(--color-line);
+      }
+
+      .timeline-item__year {
+        color: var(--color-gold-bright);
+        font-family: var(--font-display);
+        font-size: 1.7rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .timeline-item__text {
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 0.94rem;
+        line-height: 1.65;
+      }
+
+      .administration {
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 88% 22%, rgba(201, 169, 110, 0.16), transparent 30rem),
+          linear-gradient(180deg, #07111f 0%, var(--color-navy-950) 52%, var(--color-navy-900) 100%);
+      }
+
+      .admin__header {
+        display: grid;
+        gap: 26px;
+        align-items: end;
+        margin-bottom: clamp(30px, 5vw, 54px);
+      }
+
+      .admin__intro {
+        display: grid;
+        gap: 18px;
+      }
+
+      .admin__intro p {
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 1rem;
+        line-height: 1.8;
+      }
+
+      .admin__note {
+        padding: 18px 20px;
+        border: 1px solid rgba(201, 169, 110, 0.36);
+        border-radius: 6px;
+        color: rgba(248, 243, 232, 0.86);
+        background: rgba(16, 38, 66, 0.42);
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+        font-size: 0.88rem;
+        line-height: 1.72;
+      }
+
+      .admin-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--color-line);
+      }
+
+      .admin-tab {
+        min-height: 48px;
+        margin-bottom: -1px;
+        padding: 0 18px;
+        border: 1px solid transparent;
+        border-bottom-color: var(--color-line);
+        color: rgba(248, 243, 232, 0.72);
+        background: transparent;
+        font: inherit;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition:
+          color 220ms var(--ease),
+          border-color 220ms var(--ease),
+          background 220ms var(--ease),
+          transform 220ms var(--ease);
+      }
+
+      .admin-tab:hover,
+      .admin-tab:focus-visible {
+        color: var(--color-ink);
+        border-color: rgba(201, 169, 110, 0.34);
+        background: rgba(201, 169, 110, 0.06);
+      }
+
+      .admin-tab.is-active {
+        color: var(--color-gold-bright);
+        border-color: rgba(201, 169, 110, 0.58);
+        border-bottom-color: var(--color-navy-950);
+        background: rgba(201, 169, 110, 0.1);
+        box-shadow: 0 -12px 38px rgba(201, 169, 110, 0.08) inset;
+      }
+
+      .admin-tab__badge {
+        margin-left: 8px;
+        color: var(--color-navy-950);
+        background: var(--color-gold-bright);
+        padding: 3px 7px;
+        border-radius: 999px;
+        font-size: 0.63rem;
+        letter-spacing: 0.1em;
+      }
+
+      .admin-panel {
+        display: grid;
+        gap: 24px;
+      }
+
+      .admin-panel[hidden] {
+        display: none;
+      }
+
+      .admin-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .admin-card {
+        position: relative;
+        min-height: 188px;
+        display: grid;
+        align-content: start;
+        gap: 14px;
+        padding: 22px;
+        border: 1px solid rgba(248, 243, 232, 0.13);
+        border-radius: 8px;
+        background:
+          linear-gradient(145deg, rgba(16, 38, 66, 0.78), rgba(5, 13, 26, 0.76)),
+          linear-gradient(180deg, rgba(201, 169, 110, 0.08), rgba(201, 169, 110, 0));
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+        transition:
+          transform 260ms var(--ease),
+          border-color 260ms var(--ease),
+          box-shadow 260ms var(--ease),
+          background 260ms var(--ease);
+      }
+
+      .admin-card:hover,
+      .admin-card:focus-within {
+        transform: translateY(-7px);
+        border-color: rgba(201, 169, 110, 0.72);
+        box-shadow:
+          0 24px 62px rgba(0, 0, 0, 0.32),
+          0 0 28px rgba(201, 169, 110, 0.2);
+      }
+
+      .admin-card__badge {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        color: var(--color-navy-950);
+        background: var(--color-gold-bright);
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+      }
+
+      .admin-card__icon {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(201, 169, 110, 0.4);
+        border-radius: 999px;
+        background: rgba(201, 169, 110, 0.08);
+        font-size: 1.45rem;
+        box-shadow: 0 0 24px rgba(201, 169, 110, 0.1);
+      }
+
+      .admin-card__name {
+        margin: 0;
+        color: var(--color-ink);
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 1;
+      }
+
+      .admin-card__text {
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 0.94rem;
+        line-height: 1.72;
+      }
+
+      .admin-card--wide {
+        min-height: 160px;
+      }
+
+      .admin__footnote {
+        margin: 0;
+        color: rgba(248, 243, 232, 0.68);
+        font-size: 0.84rem;
+        line-height: 1.7;
+      }
+
+      .gallery {
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 18% 18%, rgba(201, 169, 110, 0.13), transparent 28rem),
+          linear-gradient(180deg, var(--color-navy-900) 0%, var(--color-navy-950) 48%, #07111f 100%);
+      }
+
+      .gallery__header {
+        display: grid;
+        gap: 24px;
+        align-items: end;
+        margin-bottom: clamp(30px, 5vw, 58px);
+      }
+
+      .gallery__intro {
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 1rem;
+        line-height: 1.82;
+      }
+
+      .gallery-masonry {
+        columns: 1;
+        column-gap: 16px;
+      }
+
+      .gallery-item {
+        position: relative;
+        display: block;
+        overflow: hidden;
+        margin: 0 0 16px;
+        break-inside: avoid;
+        border: 1px solid rgba(248, 243, 232, 0.14);
+        border-radius: 8px;
+        background: var(--color-navy-800);
+        box-shadow: 0 22px 54px rgba(0, 0, 0, 0.28);
+        transform: translateZ(0);
+      }
+
+      .gallery-item::after {
+        position: absolute;
+        inset: 0;
+        content: "";
+        background:
+          linear-gradient(180deg, rgba(5, 13, 26, 0.02) 0%, rgba(5, 13, 26, 0.16) 42%, rgba(5, 13, 26, 0.86) 100%),
+          linear-gradient(90deg, rgba(201, 169, 110, 0.16), rgba(201, 169, 110, 0));
+        opacity: 0.9;
+        transition: opacity 260ms var(--ease);
+      }
+
+      .gallery-item:hover::after,
+      .gallery-item:focus-within::after {
+        opacity: 1;
+      }
+
+      .gallery-item__image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scale(1.01);
+        transition: transform 520ms var(--ease);
+      }
+
+      .gallery-item:hover .gallery-item__image,
+      .gallery-item:focus-within .gallery-item__image {
+        transform: scale(1.08);
+      }
+
+      .gallery-item__caption {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1;
+        display: grid;
+        gap: 10px;
+        padding: 22px;
+        transform: translateY(6px);
+        transition: transform 260ms var(--ease);
+      }
+
+      .gallery-item:hover .gallery-item__caption,
+      .gallery-item:focus-within .gallery-item__caption {
+        transform: translateY(0);
+      }
+
+      .gallery-item__name {
+        color: var(--color-ink);
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 8vw, 3rem);
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 0.95;
+        text-shadow: 0 14px 38px rgba(0, 0, 0, 0.46);
+      }
+
+      .gallery-item__badge {
+        width: fit-content;
+        padding: 7px 10px;
+        border: 1px solid rgba(201, 169, 110, 0.48);
+        border-radius: 999px;
+        color: var(--color-gold-bright);
+        background: rgba(5, 13, 26, 0.58);
+        backdrop-filter: blur(12px);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .gallery-item--landscape {
+        aspect-ratio: 4 / 3;
+      }
+
+      .gallery-item--portrait {
+        aspect-ratio: 4 / 5;
+      }
+
+      .gallery-item--cinema {
+        aspect-ratio: 16 / 10;
+      }
+
+      .gallery-item--square {
+        aspect-ratio: 1 / 1;
+      }
+
+      .ethnic {
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 72% 18%, rgba(232, 201, 122, 0.12), transparent 28rem),
+          linear-gradient(180deg, #07111f 0%, var(--color-navy-950) 58%, var(--color-navy-900) 100%);
+      }
+
+      .ethnic__header {
+        display: grid;
+        gap: 24px;
+        align-items: end;
+        margin-bottom: clamp(30px, 5vw, 58px);
+      }
+
+      .ethnic__intro {
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 1rem;
+        line-height: 1.82;
+      }
+
+      .ethnic-shell {
+        display: grid;
+        gap: 20px;
+      }
+
+      .ethnic-tabs {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 0 0 10px;
+        scrollbar-width: thin;
+      }
+
+      .ethnic-tab {
+        min-width: max-content;
+        min-height: 46px;
+        padding: 0 16px;
+        border: 1px solid rgba(248, 243, 232, 0.14);
+        border-radius: 999px;
+        color: rgba(248, 243, 232, 0.72);
+        background: rgba(16, 38, 66, 0.34);
+        font: inherit;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition:
+          color 220ms var(--ease),
+          border-color 220ms var(--ease),
+          background 220ms var(--ease),
+          box-shadow 220ms var(--ease);
+      }
+
+      .ethnic-tab:hover,
+      .ethnic-tab:focus-visible {
+        color: var(--color-ink);
+        border-color: rgba(201, 169, 110, 0.44);
+        background: rgba(201, 169, 110, 0.08);
+      }
+
+      .ethnic-tab.is-active {
+        color: var(--color-navy-950);
+        border-color: var(--color-gold-bright);
+        background: var(--color-gold-bright);
+        box-shadow: var(--shadow-gold);
+      }
+
+      .ethnic-panel {
+        border: 1px solid rgba(248, 243, 232, 0.13);
+        border-radius: 8px;
+        background:
+          linear-gradient(145deg, rgba(16, 38, 66, 0.82), rgba(5, 13, 26, 0.84)),
+          linear-gradient(180deg, rgba(201, 169, 110, 0.08), rgba(201, 169, 110, 0));
+        box-shadow: 0 24px 68px rgba(0, 0, 0, 0.28);
+      }
+
+      .ethnic-panel[hidden] {
+        display: none;
+      }
+
+      .ethnic-panel__grid {
+        display: grid;
+        gap: 26px;
+        padding: clamp(22px, 4vw, 34px);
+      }
+
+      .ethnic-panel__content {
+        display: grid;
+        align-content: start;
+        gap: 22px;
+      }
+
+      .ethnic-panel__eyebrow {
+        width: fit-content;
+        padding: 7px 10px;
+        border: 1px solid rgba(201, 169, 110, 0.42);
+        border-radius: 999px;
+        color: var(--color-gold-bright);
+        background: rgba(201, 169, 110, 0.08);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .ethnic-panel__title {
+        margin: 0;
+        color: var(--color-ink);
+        font-family: var(--font-display);
+        font-size: clamp(2.6rem, 11vw, 5rem);
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 0.9;
+      }
+
+      .ethnic-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .ethnic-stat {
+        display: inline-flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: min(100%, 154px);
+        padding: 12px 14px;
+        border: 1px solid rgba(201, 169, 110, 0.28);
+        border-radius: 8px;
+        background: rgba(5, 13, 26, 0.42);
+      }
+
+      .ethnic-stat__value {
+        color: var(--color-gold-bright);
+        font-family: var(--font-display);
+        font-size: 1.55rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .ethnic-stat__label {
+        color: rgba(248, 243, 232, 0.68);
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .ethnic-list {
+        display: grid;
+        gap: 13px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .ethnic-list li {
+        position: relative;
+        padding-left: 22px;
+        color: var(--color-muted);
+        font-size: 0.98rem;
+        line-height: 1.78;
+      }
+
+      .ethnic-list li::before {
+        position: absolute;
+        left: 0;
+        top: 0.72em;
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        content: "";
+        background: var(--color-gold-bright);
+        box-shadow: var(--shadow-gold);
+      }
+
+      .ethnic-list strong {
+        color: rgba(248, 243, 232, 0.95);
+        font-weight: 800;
+      }
+
+      .ethnic-media {
+        position: relative;
+        min-height: 340px;
+        overflow: hidden;
+        border: 1px solid rgba(201, 169, 110, 0.36);
+        border-radius: 6px;
+        background: var(--color-navy-800);
+      }
+
+      .ethnic-media::after {
+        position: absolute;
+        inset: 0;
+        content: "";
+        background:
+          linear-gradient(180deg, rgba(5, 13, 26, 0.02), rgba(5, 13, 26, 0.54)),
+          linear-gradient(90deg, rgba(201, 169, 110, 0.12), rgba(201, 169, 110, 0));
+        pointer-events: none;
+      }
+
+      .ethnic-media__image {
+        width: 100%;
+        height: 100%;
+        min-height: 340px;
+        object-fit: cover;
+        transform: scale(1.02);
+      }
+
+      .ethnic-media__caption {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1;
+        padding: 18px 20px;
+        color: rgba(248, 243, 232, 0.82);
+        background: linear-gradient(180deg, rgba(5, 13, 26, 0), rgba(5, 13, 26, 0.88));
+        font-size: 0.8rem;
+        line-height: 1.64;
+      }
+
+      .map-section {
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 18% 20%, rgba(201, 169, 110, 0.16), transparent 34rem),
+          linear-gradient(180deg, var(--color-navy-900) 0%, var(--color-navy-950) 58%, #07111f 100%);
+      }
+
+      .map-section__header {
+        display: grid;
+        gap: 24px;
+        align-items: end;
+        margin-bottom: clamp(30px, 5vw, 58px);
+      }
+
+      .map-section__intro {
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 1rem;
+        line-height: 1.82;
+      }
+
+      .map-explorer {
+        display: grid;
+        gap: 24px;
+      }
+
+      .map-shell {
+        position: relative;
+        min-height: 620px;
+        overflow: hidden;
+        border: 1px solid rgba(248, 243, 232, 0.13);
+        border-radius: 8px;
+        background:
+          linear-gradient(145deg, rgba(16, 38, 66, 0.64), rgba(5, 13, 26, 0.72)),
+          radial-gradient(circle at 50% 30%, rgba(201, 169, 110, 0.1), transparent 18rem);
+        box-shadow: 0 24px 68px rgba(0, 0, 0, 0.3);
+      }
+
+      .vietnam-map {
+        width: 100%;
+        height: 100%;
+        min-height: 620px;
+        display: block;
+      }
+
+      .map-province {
+        fill: var(--color-navy-700);
+        stroke: rgba(248, 243, 232, 0.62);
+        stroke-width: 1.35;
+        vector-effect: non-scaling-stroke;
+        cursor: pointer;
+        filter: drop-shadow(0 7px 12px rgba(0, 0, 0, 0.18));
+        transition:
+          fill 180ms var(--ease),
+          stroke 180ms var(--ease),
+          filter 180ms var(--ease),
+          transform 180ms var(--ease);
+      }
+
+      .map-province:hover,
+      .map-province:focus-visible {
+        fill: var(--color-gold);
+        stroke: rgba(248, 243, 232, 0.9);
+        filter: drop-shadow(0 0 14px rgba(201, 169, 110, 0.48));
+        outline: none;
+      }
+
+      .map-province.is-selected {
+        fill: var(--color-gold-bright);
+        stroke: #fff7d8;
+        filter:
+          drop-shadow(0 0 12px rgba(232, 201, 122, 0.7))
+          drop-shadow(0 18px 28px rgba(0, 0, 0, 0.28));
+      }
+
+      .map-province--current {
+        stroke-width: 2;
+      }
+
+      .map-islands {
+        filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.4));
+        pointer-events: none;
+      }
+
+      .map-island-ring {
+        fill: rgba(56, 189, 248, 0.08);
+        stroke: rgba(165, 243, 252, 0.46);
+        stroke-width: 1;
+        stroke-dasharray: 3 4;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .map-island-dot {
+        fill: var(--color-cyan-bright);
+        stroke: rgba(248, 243, 232, 0.8);
+        stroke-width: 0.9;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .map-island-line {
+        stroke: rgba(165, 243, 252, 0.48);
+        stroke-width: 0.9;
+        stroke-dasharray: 2 4;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .map-island-label {
+        fill: var(--color-cyan-bright);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0;
+        pointer-events: none;
+        text-anchor: middle;
+        text-shadow:
+          0 2px 8px rgba(5, 13, 26, 0.94),
+          0 0 10px rgba(56, 189, 248, 0.46);
+      }
+
+      .map-label {
+        fill: rgba(248, 243, 232, 0.72);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0;
+        pointer-events: none;
+        text-anchor: middle;
+        text-shadow: 0 2px 6px rgba(5, 13, 26, 0.7);
+      }
+
+      .map-label--small {
+        font-size: 8px;
+      }
+
+      .map-note {
+        position: absolute;
+        right: 18px;
+        bottom: 18px;
+        max-width: min(290px, calc(100% - 36px));
+        padding: 14px 16px;
+        border: 1px solid rgba(201, 169, 110, 0.38);
+        border-radius: 6px;
+        color: rgba(248, 243, 232, 0.76);
+        background: rgba(5, 13, 26, 0.76);
+        backdrop-filter: blur(12px);
+        font-size: 0.78rem;
+        line-height: 1.6;
+      }
+
+      .province-list {
+        display: grid;
+        gap: 18px;
+        align-content: start;
+      }
+
+      .province-group {
+        display: grid;
+        gap: 10px;
+      }
+
+      .province-group__title {
+        margin: 0;
+        color: var(--color-gold-bright);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        line-height: 1.5;
+        text-transform: uppercase;
+      }
+
+      .province-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .province-pill {
+        min-height: 34px;
+        padding: 0 12px;
+        border: 1px solid rgba(248, 243, 232, 0.14);
+        border-radius: 999px;
+        color: rgba(248, 243, 232, 0.78);
+        background: rgba(16, 38, 66, 0.36);
+        font: inherit;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+        transition:
+          color 180ms var(--ease),
+          border-color 180ms var(--ease),
+          background 180ms var(--ease),
+          transform 180ms var(--ease);
+      }
+
+      .province-pill:hover,
+      .province-pill:focus-visible {
+        color: var(--color-ink);
+        border-color: rgba(201, 169, 110, 0.54);
+        background: rgba(201, 169, 110, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .province-pill.is-active {
+        color: var(--color-navy-950);
+        border-color: var(--color-gold-bright);
+        background: var(--color-gold-bright);
+        box-shadow: var(--shadow-gold);
+      }
+
+      .province-pill--current {
+        cursor: default;
+        opacity: 0.78;
+      }
+
+      .province-detail {
+        margin-top: clamp(28px, 5vw, 54px);
+        border: 1px solid rgba(201, 169, 110, 0.32);
+        border-radius: 8px;
+        background:
+          linear-gradient(145deg, rgba(16, 38, 66, 0.78), rgba(5, 13, 26, 0.84)),
+          linear-gradient(180deg, rgba(201, 169, 110, 0.1), rgba(201, 169, 110, 0));
+        box-shadow: 0 24px 68px rgba(0, 0, 0, 0.32);
+        opacity: 0;
+        transform: translateY(24px);
+        transition:
+          opacity 360ms var(--ease),
+          transform 360ms var(--ease);
+      }
+
+      .province-detail.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .province-detail__inner {
+        display: grid;
+        gap: 24px;
+        padding: clamp(22px, 4vw, 34px);
+      }
+
+      .province-detail__header {
+        display: grid;
+        gap: 12px;
+      }
+
+      .province-detail__title {
+        margin: 0;
+        color: var(--color-ink);
+        font-family: var(--font-display);
+        font-size: clamp(2.7rem, 11vw, 5.6rem);
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 0.88;
+      }
+
+      .province-detail__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        color: rgba(248, 243, 232, 0.72);
+        font-size: 0.88rem;
+        line-height: 1.6;
+      }
+
+      .status-badge {
+        width: fit-content;
+        padding: 6px 9px;
+        border-radius: 999px;
+        color: var(--color-navy-950);
+        background: var(--color-gold-bright);
+        font-size: 0.66rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .detail-metric {
+        min-height: 108px;
+        padding: 16px;
+        border: 1px solid rgba(248, 243, 232, 0.12);
+        border-radius: 8px;
+        background: rgba(5, 13, 26, 0.38);
+      }
+
+      .detail-metric__label {
+        display: block;
+        color: rgba(248, 243, 232, 0.64);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        line-height: 1.5;
+        text-transform: uppercase;
+      }
+
+      .detail-metric__value {
+        display: block;
+        margin-top: 9px;
+        color: var(--color-gold-bright);
+        font-family: var(--font-display);
+        font-size: clamp(1.8rem, 6vw, 2.75rem);
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .detail-metric--text .detail-metric__value {
+        color: var(--color-muted);
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        font-weight: 700;
+        line-height: 1.55;
+      }
+
+      .detail-block {
+        display: grid;
+        gap: 12px;
+      }
+
+      .detail-block__title {
+        margin: 0;
+        color: var(--color-ink);
+        font-size: 0.78rem;
+        font-weight: 900;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .detail-tag {
+        padding: 7px 10px;
+        border: 1px solid rgba(201, 169, 110, 0.26);
+        border-radius: 999px;
+        color: rgba(248, 243, 232, 0.8);
+        background: rgba(16, 38, 66, 0.36);
+        font-size: 0.76rem;
+        font-weight: 800;
+      }
+
+      .ethnic-bars {
+        display: grid;
+        gap: 11px;
+      }
+
+      .ethnic-bar {
+        display: grid;
+        gap: 6px;
+      }
+
+      .ethnic-bar__row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        color: rgba(248, 243, 232, 0.76);
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+
+      .ethnic-bar__row span:last-child {
+        color: var(--color-cyan-bright);
+      }
+
+      .ethnic-bar__track {
+        position: relative;
+        height: 12px;
+        overflow: hidden;
+        border-radius: 999px;
+        border: 1px solid rgba(165, 243, 252, 0.16);
+        background:
+          linear-gradient(180deg, rgba(248, 243, 232, 0.08), rgba(248, 243, 232, 0.01)),
+          rgba(16, 38, 66, 0.72);
+        box-shadow:
+          inset 0 1px 4px rgba(0, 0, 0, 0.42),
+          0 0 0 1px rgba(5, 13, 26, 0.28);
+      }
+
+      .ethnic-bar__track::before {
+        position: absolute;
+        inset: 2px 4px auto;
+        height: 3px;
+        border-radius: 999px;
+        content: "";
+        background: linear-gradient(90deg, rgba(248, 243, 232, 0.22), rgba(248, 243, 232, 0));
+        pointer-events: none;
+      }
+
+      .ethnic-bar__fill {
+        position: relative;
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        overflow: hidden;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0) 48%),
+          linear-gradient(90deg, var(--color-cyan-deep), var(--color-cyan), var(--color-cyan-bright));
+        box-shadow:
+          0 0 14px rgba(56, 189, 248, 0.48),
+          inset 0 0 9px rgba(165, 243, 252, 0.32);
+        transform-origin: left center;
+        animation: tubeGrow 880ms var(--ease) both;
+      }
+
+      .ethnic-bar__fill::before {
+        position: absolute;
+        inset: 0;
+        content: "";
+        background: linear-gradient(
+          105deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.08) 32%,
+          rgba(255, 255, 255, 0.66) 48%,
+          rgba(255, 255, 255, 0.08) 64%,
+          transparent 100%
+        );
+        transform: translateX(-110%);
+        animation: tubeFlow 1.8s linear infinite;
+      }
+
+      .highlight-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .highlight-card {
+        padding: 16px;
+        border: 1px solid rgba(248, 243, 232, 0.12);
+        border-radius: 8px;
+        background: rgba(5, 13, 26, 0.38);
+      }
+
+      .highlight-card__icon {
+        display: block;
+        font-size: 1.55rem;
+      }
+
+      .highlight-card__title {
+        display: block;
+        margin-top: 10px;
+        color: var(--color-ink);
+        font-weight: 900;
+      }
+
+      .highlight-card__text {
+        display: block;
+        margin-top: 6px;
+        color: var(--color-muted);
+        font-size: 0.86rem;
+        line-height: 1.65;
+      }
+
+      .section-anchor {
+        min-height: 32vh;
+        padding: 72px 0;
+        background: var(--color-navy-950);
+      }
+
+      .section-anchor__inner {
+        width: var(--container);
+        margin: 0 auto;
+        border-top: 1px solid var(--color-line);
+      }
+
+      .site-footer {
+        position: relative;
+        overflow: hidden;
+        padding: 54px 0 44px;
+        border-top: 1px solid rgba(248, 243, 232, 0.12);
+        background:
+          linear-gradient(90deg, rgba(201, 169, 110, 0.08), transparent 44%),
+          #050d1a;
+      }
+
+      .site-footer::before {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        content: "";
+        background: linear-gradient(180deg, rgba(5, 13, 26, 0), rgba(5, 13, 26, 0.72));
+      }
+
+      .site-footer__inner {
+        position: relative;
+        width: var(--container);
+        margin: 0 auto;
+        display: grid;
+        gap: 30px;
+      }
+
+      .site-footer__top {
+        display: grid;
+        gap: 24px;
+      }
+
+      .footer-brand {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        gap: 12px;
+        color: var(--color-ink);
+        font-family: var(--font-display);
+        font-size: clamp(1.9rem, 8vw, 3rem);
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .footer-brand__mark {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        border: 1px solid rgba(201, 169, 110, 0.46);
+        border-radius: 999px;
+        background: rgba(201, 169, 110, 0.1);
+        box-shadow: var(--shadow-gold);
+        font-family: var(--font-body);
+        font-size: 1.2rem;
+      }
+
+      .footer-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .footer-nav a {
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 14px;
+        border: 1px solid rgba(248, 243, 232, 0.14);
+        border-radius: 999px;
+        color: rgba(248, 243, 232, 0.78);
+        background: rgba(255, 255, 255, 0.03);
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        line-height: 1.2;
+        text-transform: uppercase;
+        transition:
+          color 220ms var(--ease),
+          border-color 220ms var(--ease),
+          background 220ms var(--ease),
+          transform 220ms var(--ease);
+      }
+
+      .footer-nav a:hover,
+      .footer-nav a:focus-visible {
+        color: var(--color-navy-950);
+        border-color: var(--color-gold-bright);
+        background: var(--color-gold-bright);
+        transform: translateY(-2px);
+      }
+
+      .site-footer__bottom {
+        display: grid;
+        gap: 12px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(248, 243, 232, 0.12);
+        color: var(--color-muted);
+        font-size: 0.84rem;
+        line-height: 1.7;
+      }
+
+      .site-footer__source {
+        margin: 0;
+      }
+
+      .site-footer__source strong {
+        color: var(--color-gold-bright);
+      }
+
+      .site-footer__copyright {
+        margin: 0;
+        color: rgba(248, 243, 232, 0.48);
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(28px);
+        transition:
+          opacity 720ms var(--ease),
+          transform 720ms var(--ease);
+      }
+
+      .reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @keyframes cuePulse {
+        0%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.48;
+        }
+
+        50% {
+          transform: translateY(8px);
+          opacity: 1;
+        }
+      }
+
+      @keyframes tubeGrow {
+        from {
+          transform: scaleX(0);
+        }
+
+        to {
+          transform: scaleX(1);
+        }
+      }
+
+      @keyframes tubeFlow {
+        to {
+          transform: translateX(110%);
+        }
+      }
+
+      @keyframes dragonFlyTop {
+        0% {
+          opacity: 0;
+          transform: translate3d(-720px, 16px, 0) rotate(-5deg) scale(0.78);
+        }
+
+        12% {
+          opacity: 1;
+        }
+
+        42% {
+          transform: translate3d(36vw, -24px, 0) rotate(4deg) scale(1);
+        }
+
+        74% {
+          opacity: 1;
+          transform: translate3d(70vw, 22px, 0) rotate(-3deg) scale(0.96);
+        }
+
+        100% {
+          opacity: 0;
+          transform: translate3d(calc(100vw + 720px), -12px, 0) rotate(5deg) scale(0.82);
+        }
+      }
+
+      @keyframes dragonFlyBottom {
+        0% {
+          opacity: 0;
+          transform: translate3d(calc(100vw + 720px), 10px, 0) rotate(5deg) scale(-0.8, 0.8);
+        }
+
+        12% {
+          opacity: 1;
+        }
+
+        44% {
+          transform: translate3d(58vw, -22px, 0) rotate(-4deg) scale(-1, 1);
+        }
+
+        76% {
+          opacity: 1;
+          transform: translate3d(24vw, 18px, 0) rotate(3deg) scale(-0.96, 0.96);
+        }
+
+        100% {
+          opacity: 0;
+          transform: translate3d(-720px, -8px, 0) rotate(-5deg) scale(-0.82, 0.82);
+        }
+      }
+
+      @media (min-width: 768px) {
+        :root {
+          --container: min(1180px, calc(100vw - 56px));
+        }
+
+        .nav {
+          display: flex;
+        }
+
+        .hero {
+          align-items: center;
+          padding: 120px 0 64px;
+        }
+
+        .hero__inner {
+          grid-template-columns: minmax(120px, 0.42fr) minmax(0, 1fr);
+          align-items: end;
+          gap: 48px;
+        }
+
+        .hero__title {
+          font-size: clamp(7.5rem, 15vw, 10.6rem);
+          letter-spacing: 0.16em;
+        }
+
+        .hero__meta {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          margin-left: clamp(0px, 8vw, 96px);
+        }
+
+        .overview__grid {
+          grid-template-columns: minmax(0, 0.94fr) minmax(280px, 0.72fr);
+          gap: clamp(44px, 6vw, 78px);
+        }
+
+        .overview__facts {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .overview__media {
+          transform: translateY(34px);
+        }
+
+        .admin__header {
+          grid-template-columns: minmax(0, 0.92fr) minmax(280px, 0.62fr);
+        }
+
+        .admin-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .gallery__header {
+          grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.56fr);
+        }
+
+        .gallery-masonry {
+          columns: 2;
+          column-gap: 18px;
+        }
+
+        .gallery-item {
+          margin-bottom: 18px;
+        }
+
+        .ethnic__header {
+          grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.56fr);
+        }
+
+        .ethnic-shell {
+          grid-template-columns: 220px minmax(0, 1fr);
+          align-items: start;
+        }
+
+        .ethnic-tabs {
+          position: sticky;
+          top: 104px;
+          display: grid;
+          overflow: visible;
+          padding: 0;
+        }
+
+        .ethnic-tab {
+          width: 100%;
+          min-width: 0;
+          min-height: auto;
+          justify-content: start;
+          padding: 13px 16px;
+          border-radius: 8px;
+          line-height: 1.35;
+          text-align: left;
+          white-space: normal;
+        }
+
+        .ethnic-panel__grid {
+          grid-template-columns: minmax(0, 0.95fr) minmax(280px, 0.78fr);
+          align-items: stretch;
+        }
+
+        .map-section__header {
+          grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.56fr);
+        }
+
+        .map-explorer {
+          grid-template-columns: minmax(360px, 0.86fr) minmax(300px, 0.74fr);
+          align-items: start;
+        }
+
+        .province-list {
+          max-height: 620px;
+          overflow: auto;
+          padding-right: 6px;
+          scrollbar-width: thin;
+        }
+
+        .detail-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .highlight-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .site-footer__top {
+          grid-template-columns: minmax(260px, 0.84fr) minmax(340px, 1fr);
+          align-items: center;
+        }
+
+        .footer-nav {
+          justify-content: flex-end;
+        }
+
+        .site-footer__bottom {
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: end;
+        }
+      }
+
+      @media (min-width: 1200px) {
+        .topbar__inner {
+          height: 84px;
+        }
+
+        .hero__title {
+          font-size: 120px;
+        }
+
+        .hero__subtitle {
+          font-size: 4rem;
+        }
+
+        .scroll-cue {
+          right: calc((100vw - 1180px) / 2);
+          bottom: 46px;
+        }
+
+        .overview__grid {
+          grid-template-columns: 1fr 0.72fr;
+        }
+
+        .overview__image-wrap {
+          aspect-ratio: 5 / 6;
+        }
+
+        .admin-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .admin-card--wide {
+          grid-column: span 3;
+        }
+
+        .gallery-masonry {
+          columns: 3;
+          column-gap: 20px;
+        }
+
+        .gallery-item {
+          margin-bottom: 20px;
+        }
+
+        .map-explorer {
+          grid-template-columns: minmax(420px, 0.78fr) minmax(380px, 0.72fr);
+        }
+
+        .detail-grid {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+
+        .hero__image {
+          transform: scale(1.05);
+        }
+
+        .dragon-runner {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="topbar" aria-label="Thanh điều hướng chính">
+        <div class="topbar__inner">
+          <a class="brand" href="#hero" aria-label="Về đầu trang">
+            <span class="brand__mark" aria-hidden="true"></span>
+            Việt Nam Explorer
+          </a>
+          <nav class="nav" aria-label="Điều hướng trang">
+            <a href="#overview">Tổng quan</a>
+            <a href="#administration">Hành chính</a>
+            <a href="#gallery">Ảnh</a>
+            <a href="#ethnic">Dân tộc</a>
+            <a href="#map">Bản đồ</a>
+          </nav>
+        </div>
+      </header>
+
+      <div class="dragon-runner" data-dragon aria-hidden="true">
+        <canvas class="dragon-canvas" data-dragon-canvas width="720" height="320"></canvas>
+      </div>
+
+      <main>
+        <section class="hero" id="hero" aria-label="Đà Nẵng">
+          <div class="hero__image" aria-hidden="true"></div>
+          <div class="hero__inner">
+            <p class="hero__kicker reveal">Miền Trung Việt Nam · Biển Đông · Sông Hàn</p>
+
+            <div class="hero__content">
+              <h1 class="hero__title reveal">Đà Nẵng</h1>
+              <p class="hero__subtitle reveal">Thành phố đáng sống nhất Việt Nam</p>
+              <p class="hero__badge reveal">✦ Hợp nhất Đà Nẵng + Quảng Nam từ 01/07/2025</p>
+
+              <div class="hero__meta reveal" aria-label="Thông tin nổi bật">
+                <span class="meta-item">
+                  <span class="meta-item__value">34</span>
+                  <span class="meta-item__label">Tỉnh thành Việt Nam 2025</span>
+                </span>
+                <span class="meta-item">
+                  <span class="meta-item__value">2 cấp</span>
+                  <span class="meta-item__label">Tỉnh, thành phố và xã, phường</span>
+                </span>
+                <span class="meta-item">
+                  <span class="meta-item__value">01.07</span>
+                  <span class="meta-item__label">Chính thức vận hành mô hình mới</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <a class="scroll-cue" href="#overview" aria-label="Cuộn xuống phần tổng quan"></a>
+        </section>
+
+        <section class="section overview" id="overview" aria-labelledby="overview-title">
+          <div class="section__inner">
+            <div class="overview__grid">
+              <div class="overview__copy">
+                <p class="section-label reveal">Tổng quan</p>
+                <h2 class="section-title reveal" id="overview-title">Một đô thị biển mở rộng về phía di sản.</h2>
+                <p class="overview__lead reveal">
+                  Đà Nẵng sau sáp nhập là trục đô thị, biển, rừng và di sản trải dài từ sông Hàn đến Hội An, Mỹ Sơn
+                  và vùng núi phía tây.
+                </p>
+
+                <div class="overview__body reveal">
+                  <p>
+                    Thành phố nằm ở miền Trung Việt Nam, giáp thành phố Huế ở phía bắc, tỉnh Quảng Ngãi ở phía nam,
+                    nước Lào ở phía tây và Biển Đông ở phía đông. Quảng Nam cũ đã được hợp nhất vào Đà Nẵng, tạo nên
+                    một không gian phát triển lớn hơn với cả đô thị trung tâm, duyên hải, trung du và miền núi.
+                  </p>
+                  <p>
+                    Trung tâm hành chính vẫn đặt tại thành phố Đà Nẵng. Nền lịch sử của vùng đất này đi từ thương cảng
+                    Hội An, các lớp văn hóa Chăm Pa, đến Đà Nẵng trực thuộc Trung ương năm 1997 và đơn vị hành chính
+                    mới vận hành từ 01/07/2025 theo Nghị quyết 202/2025/QH15.
+                  </p>
+                  <p>
+                    Thành phố thường được gọi là "thành phố đáng sống" và được định vị như một trung tâm công nghệ,
+                    đổi mới sáng tạo của Việt Nam. Khí hậu nhiệt đới gió mùa chia hai mùa rõ rệt: mùa khô nhiều nắng
+                    và mùa mưa chịu ảnh hưởng bão, tạo nên nhịp sống ven biển rất riêng.
+                  </p>
+                </div>
+
+                <div class="overview__narration reveal" aria-label="Đọc phần giới thiệu">
+                  <button class="narration-button" type="button" data-narration-button aria-pressed="false">
+                    <span class="narration-button__icon" aria-hidden="true">▶</span>
+                    <span data-narration-label>Start</span>
+                  </button>
+                  <span class="narration-status" data-narration-status aria-live="polite">Giọng Việt sẵn sàng</span>
+                  <audio data-narration-audio preload="none" src="assets/danang-intro-vi.mp3"></audio>
+                </div>
+
+                <div class="overview__facts reveal" aria-label="Chỉ số chính sau sáp nhập">
+                  <span class="fact-row">
+                    <span class="fact-row__value">11.859,59</span>
+                    <span class="fact-row__label">km² diện tích tự nhiên</span>
+                  </span>
+                  <span class="fact-row">
+                    <span class="fact-row__value">3.065.628</span>
+                    <span class="fact-row__label">người sau sáp nhập</span>
+                  </span>
+                  <span class="fact-row">
+                    <span class="fact-row__value">1997</span>
+                    <span class="fact-row__label">trực thuộc Trung ương</span>
+                  </span>
+                </div>
+
+                <div class="overview__timeline reveal" aria-label="Các mốc lịch sử">
+                  <div class="timeline-item">
+                    <span class="timeline-item__year">Hội An</span>
+                    <p class="timeline-item__text">Cảng thị quốc tế và trung tâm giao thương từng định hình bản sắc vùng đất Quảng.</p>
+                  </div>
+                  <div class="timeline-item">
+                    <span class="timeline-item__year">1997</span>
+                    <p class="timeline-item__text">Đà Nẵng trở thành thành phố trực thuộc Trung ương, mở thời kỳ đô thị hóa mạnh mẽ.</p>
+                  </div>
+                  <div class="timeline-item">
+                    <span class="timeline-item__year">2025</span>
+                    <p class="timeline-item__text">Hợp nhất Đà Nẵng và Quảng Nam, vận hành mô hình chính quyền địa phương 2 cấp.</p>
+                  </div>
+                </div>
+              </div>
+
+              <figure class="overview__media reveal">
+                <div class="overview__image-wrap">
+                  <img
+                    class="overview__image"
+                    src="https://farm2.staticflickr.com/1515/26690082115_948de0b95d_o.jpg"
+                    alt="Toàn cảnh thành phố Đà Nẵng bên biển và núi"
+                    loading="lazy"
+                  />
+                  <figcaption class="overview__caption">
+                    Vùng đô thị mới kết nối trung tâm Đà Nẵng, bờ biển miền Trung, phố cổ Hội An, thánh địa Mỹ Sơn và
+                    các cộng đồng miền núi phía tây.
+                  </figcaption>
+                </div>
+              </figure>
+            </div>
+          </div>
+        </section>
+        <section class="section administration" id="administration" aria-labelledby="admin-title">
+          <div class="section__inner">
+            <div class="admin__header">
+              <div>
+                <p class="section-label reveal">Đơn vị hành chính</p>
+                <h2 class="section-title reveal" id="admin-title">Đà Nẵng sau sáp nhập 2025.</h2>
+              </div>
+              <div class="admin__intro reveal">
+                <p>
+                  Theo mô hình chính quyền địa phương 2 cấp, cấp huyện không còn là cấp chính quyền trung gian.
+                  Các tên dưới đây được trình bày như những khu vực nhận diện lịch sử, đô thị và văn hóa.
+                </p>
+                <div class="admin__note">
+                  Cấu trúc vận hành mới đi theo cấp tỉnh, thành phố và cấp xã, phường. Đà Nẵng mới bao gồm toàn bộ
+                  thành phố Đà Nẵng cũ và tỉnh Quảng Nam cũ từ 01/07/2025.
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-tabs reveal" role="tablist" aria-label="Khu vực hành chính Đà Nẵng">
+              <button
+                class="admin-tab is-active"
+                id="admin-tab-danang"
+                type="button"
+                role="tab"
+                aria-selected="true"
+                aria-controls="admin-panel-danang"
+                data-admin-tab="danang"
+              >
+                Khu vực Đà Nẵng cũ
+              </button>
+              <button
+                class="admin-tab"
+                id="admin-tab-quangnam"
+                type="button"
+                role="tab"
+                aria-selected="false"
+                aria-controls="admin-panel-quangnam"
+                data-admin-tab="quangnam"
+              >
+                Khu vực Quảng Nam cũ <span class="admin-tab__badge">Mới</span>
+              </button>
+            </div>
+
+            <div
+              class="admin-panel reveal"
+              id="admin-panel-danang"
+              role="tabpanel"
+              aria-labelledby="admin-tab-danang"
+              data-admin-panel="danang"
+            >
+              <div class="admin-grid">
+                <article class="admin-card">
+                  <span class="admin-card__icon" aria-hidden="true">🏙️</span>
+                  <h3 class="admin-card__name">Hải Châu</h3>
+                  <p class="admin-card__text">Trung tâm chính trị, kinh tế; khoảng 215.000 dân.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__icon" aria-hidden="true">🌊</span>
+                  <h3 class="admin-card__name">Thanh Khê</h3>
+                  <p class="admin-card__text">Một trong những khu vực đông dân nhất của Đà Nẵng cũ; khoảng 195.000 dân.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__icon" aria-hidden="true">🌉</span>
+                  <h3 class="admin-card__name">Sơn Trà</h3>
+                  <p class="admin-card__text">Bán đảo Sơn Trà, cảng biển, bờ đông sông Hàn; khoảng 175.000 dân.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__icon" aria-hidden="true">🏖️</span>
+                  <h3 class="admin-card__name">Ngũ Hành Sơn</h3>
+                  <p class="admin-card__text">Làng đá mỹ nghệ Non Nước, cụm danh thắng ven biển; khoảng 95.000 dân.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__icon" aria-hidden="true">🏘️</span>
+                  <h3 class="admin-card__name">Liên Chiểu</h3>
+                  <p class="admin-card__text">Khu công nghiệp, đại học, cửa ngõ phía tây bắc; khoảng 185.000 dân.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__icon" aria-hidden="true">🏔️</span>
+                  <h3 class="admin-card__name">Cẩm Lệ</h3>
+                  <p class="admin-card__text">Không gian phía nam nội thành, kết nối các trục đô thị mới; khoảng 120.000 dân.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__icon" aria-hidden="true">🌿</span>
+                  <h3 class="admin-card__name">Hòa Vang</h3>
+                  <p class="admin-card__text">Vùng nông thôn, rừng núi, sinh thái phía tây; khoảng 130.000 dân.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__icon" aria-hidden="true">🏝️</span>
+                  <h3 class="admin-card__name">Hoàng Sa</h3>
+                  <p class="admin-card__text">Quần đảo thuộc chủ quyền Việt Nam, hiện là khu vực đang tranh chấp.</p>
+                </article>
+              </div>
+            </div>
+
+            <div
+              class="admin-panel reveal"
+              id="admin-panel-quangnam"
+              role="tabpanel"
+              aria-labelledby="admin-tab-quangnam"
+              data-admin-panel="quangnam"
+              hidden
+            >
+              <div class="admin-grid">
+                <article class="admin-card">
+                  <span class="admin-card__badge">MỚI</span>
+                  <span class="admin-card__icon" aria-hidden="true">🏛️</span>
+                  <h3 class="admin-card__name">Hội An</h3>
+                  <p class="admin-card__text">Di sản UNESCO, phố cổ nổi tiếng và trung tâm văn hóa thương cảng lịch sử.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__badge">MỚI</span>
+                  <span class="admin-card__icon" aria-hidden="true">⛰️</span>
+                  <h3 class="admin-card__name">Tam Kỳ</h3>
+                  <p class="admin-card__text">Trung tâm hành chính Quảng Nam cũ, cửa ngõ kết nối vùng nam Đà Nẵng mới.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__badge">MỚI</span>
+                  <span class="admin-card__icon" aria-hidden="true">🌊</span>
+                  <h3 class="admin-card__name">Núi Thành</h3>
+                  <p class="admin-card__text">Cảng Kỳ Hà, khu kinh tế mở Chu Lai và trục công nghiệp ven biển.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__badge">MỚI</span>
+                  <span class="admin-card__icon" aria-hidden="true">🌿</span>
+                  <h3 class="admin-card__name">Tây Giang</h3>
+                  <p class="admin-card__text">Vùng núi Cơ Tu, giáp Lào, nổi bật với rừng già và văn hóa cộng đồng.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__badge">MỚI</span>
+                  <span class="admin-card__icon" aria-hidden="true">🏖️</span>
+                  <h3 class="admin-card__name">Thăng Bình</h3>
+                  <p class="admin-card__text">Không gian duyên hải, làng biển và các cụm cảnh quan gắn với Tam Thanh.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__badge">MỚI</span>
+                  <span class="admin-card__icon" aria-hidden="true">🌄</span>
+                  <h3 class="admin-card__name">Tiên Phước</h3>
+                  <p class="admin-card__text">Làng quê trung du, cảnh quan vườn đồi và nhịp sống miền quê xứ Quảng.</p>
+                </article>
+                <article class="admin-card">
+                  <span class="admin-card__badge">MỚI</span>
+                  <span class="admin-card__icon" aria-hidden="true">🏺</span>
+                  <h3 class="admin-card__name">Mỹ Sơn</h3>
+                  <p class="admin-card__text">Thánh địa Chăm Pa, Di sản UNESCO và dấu ấn văn minh cổ ở miền Trung.</p>
+                </article>
+                <article class="admin-card admin-card--wide">
+                  <span class="admin-card__badge">MỚI</span>
+                  <span class="admin-card__icon" aria-hidden="true">✦</span>
+                  <h3 class="admin-card__name">Các xã, phường khác</h3>
+                  <p class="admin-card__text">
+                    Còn nhiều xã, phường thuộc địa bàn cũ của 18 huyện, thành phố, thị xã Quảng Nam nay nằm trong
+                    không gian Đà Nẵng mới.
+                  </p>
+                </article>
+              </div>
+              <p class="admin__footnote">
+                Tên khu vực được dùng theo cách gọi quen thuộc trước sáp nhập để người đọc dễ định vị lịch sử và địa lý.
+              </p>
+            </div>
+          </div>
+        </section>
+        <section class="section gallery" id="gallery" aria-labelledby="gallery-title">
+          <div class="section__inner">
+            <div class="gallery__header">
+              <div>
+                <p class="section-label reveal">Gallery ảnh</p>
+                <h2 class="section-title reveal" id="gallery-title">Những khung hình làm nên Đà Nẵng.</h2>
+              </div>
+              <p class="gallery__intro reveal">
+                Từ cây cầu rực lửa trên sông Hàn đến các di sản Hội An, Mỹ Sơn, Đà Nẵng mới là một bản đồ thị giác
+                nơi đô thị biển, núi rừng và ký ức miền Trung cùng hiện diện.
+              </p>
+            </div>
+
+            <div class="gallery-masonry reveal" aria-label="Bộ sưu tập ảnh Đà Nẵng">
+              <figure class="gallery-item gallery-item--cinema">
+                <img
+                  class="gallery-item__image"
+                  src="https://i.pinimg.com/1200x/2f/2e/2f/2f2e2fe1215213467a45ca0fc078d479.jpg"
+                  alt="Cầu Rồng Đà Nẵng về đêm"
+                  loading="lazy"
+                />
+                <figcaption class="gallery-item__caption">
+                  <span class="gallery-item__name">Cầu Rồng</span>
+                  <span class="gallery-item__badge">📍 Đà Nẵng</span>
+                </figcaption>
+              </figure>
+
+              <figure class="gallery-item gallery-item--portrait">
+                <img
+                  class="gallery-item__image"
+                  src="https://duan-sungroup.com/wp-content/uploads/2022/10/khu-vuon-co-tich-giua-long-da-nang-e1665823875574.png"
+                  alt="Không gian cổ tích tại Bà Nà Hills"
+                  loading="lazy"
+                />
+                <figcaption class="gallery-item__caption">
+                  <span class="gallery-item__name">Bà Nà Hills</span>
+                  <span class="gallery-item__badge">📍 Đà Nẵng</span>
+                </figcaption>
+              </figure>
+
+              <figure class="gallery-item gallery-item--landscape">
+                <img
+                  class="gallery-item__image"
+                  src="https://sidiningdanang.com/wp-content/uploads/2025/07/my-khe-city-beach-da-nang-2.jpg"
+                  alt="Bãi biển Mỹ Khê nhìn từ trên cao"
+                  loading="lazy"
+                />
+                <figcaption class="gallery-item__caption">
+                  <span class="gallery-item__name">Biển Mỹ Khê</span>
+                  <span class="gallery-item__badge">📍 Đà Nẵng</span>
+                </figcaption>
+              </figure>
+
+              <figure class="gallery-item gallery-item--square">
+                <img
+                  class="gallery-item__image"
+                  src="https://danangfantasticity.com/wp-content/uploads/2025/08/danh-thang-ngu-hanh-son-da-nang-002.jpg"
+                  alt="Danh thắng Ngũ Hành Sơn"
+                  loading="lazy"
+                />
+                <figcaption class="gallery-item__caption">
+                  <span class="gallery-item__name">Ngũ Hành Sơn</span>
+                  <span class="gallery-item__badge">📍 Đà Nẵng</span>
+                </figcaption>
+              </figure>
+
+              <figure class="gallery-item gallery-item--portrait">
+                <img
+                  class="gallery-item__image"
+                  src="https://d2e5ushqwiltxm.cloudfront.net/wp-content/uploads/sites/86/2023/08/30020055/Thumbnail-image-from-Prawat-Thananithaporn-under-the-Shutterstock-Terms-of-Use.jpg"
+                  alt="Cầu Vàng tại Bà Nà"
+                  loading="lazy"
+                />
+                <figcaption class="gallery-item__caption">
+                  <span class="gallery-item__name">Cầu Vàng</span>
+                  <span class="gallery-item__badge">📍 Đà Nẵng</span>
+                </figcaption>
+              </figure>
+
+              <figure class="gallery-item gallery-item--cinema">
+                <img
+                  class="gallery-item__image"
+                  src="https://www.homepaylater.vn/static/d4f2c13637c198d9e593a3590e1b111b/22553/1_thanh_pho_hoi_an_duoc_unesco_cong_nhan_la_di_san_van_hoa_the_gioi_noi_tieng_voi_nhung_ngoi_nha_co_kinh_62c7183de4.jpg"
+                  alt="Phố cổ Hội An với những ngôi nhà cổ"
+                  loading="lazy"
+                />
+                <figcaption class="gallery-item__caption">
+                  <span class="gallery-item__name">Phố cổ Hội An</span>
+                  <span class="gallery-item__badge">📍 Hội An · Đà Nẵng</span>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </section>
+        <section class="section ethnic" id="ethnic" aria-labelledby="ethnic-title">
+          <div class="section__inner">
+            <div class="ethnic__header">
+              <div>
+                <p class="section-label reveal">Các dân tộc</p>
+                <h2 class="section-title reveal" id="ethnic-title">Bản sắc sống trong từng lớp địa hình.</h2>
+              </div>
+              <p class="ethnic__intro reveal">
+                Đà Nẵng mới không chỉ là một đô thị biển. Không gian sau sáp nhập còn ôm lấy phố cổ, thung lũng Chăm
+                Pa, các làng miền núi Cơ Tu và những cộng đồng cư dân đã làm nên nhịp sống xứ Quảng.
+              </p>
+            </div>
+
+            <div class="ethnic-shell reveal">
+              <div class="ethnic-tabs" role="tablist" aria-label="Các dân tộc tại Đà Nẵng">
+                <button
+                  class="ethnic-tab is-active"
+                  id="ethnic-tab-kinh"
+                  type="button"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="ethnic-panel-kinh"
+                  data-ethnic-tab="kinh"
+                >
+                  Người Kinh
+                </button>
+                <button
+                  class="ethnic-tab"
+                  id="ethnic-tab-cotu"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="ethnic-panel-cotu"
+                  data-ethnic-tab="cotu"
+                >
+                  Người Cơ Tu
+                </button>
+                <button
+                  class="ethnic-tab"
+                  id="ethnic-tab-xodang"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="ethnic-panel-xodang"
+                  data-ethnic-tab="xodang"
+                >
+                  Xơ Đăng & Giẻ Triêng
+                </button>
+                <button
+                  class="ethnic-tab"
+                  id="ethnic-tab-hoa"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="ethnic-panel-hoa"
+                  data-ethnic-tab="hoa"
+                >
+                  Người Hoa
+                </button>
+                <button
+                  class="ethnic-tab"
+                  id="ethnic-tab-cham"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="ethnic-panel-cham"
+                  data-ethnic-tab="cham"
+                >
+                  Người Chăm
+                </button>
+              </div>
+
+              <article
+                class="ethnic-panel"
+                id="ethnic-panel-kinh"
+                role="tabpanel"
+                aria-labelledby="ethnic-tab-kinh"
+                data-ethnic-panel="kinh"
+              >
+                <div class="ethnic-panel__grid">
+                  <div class="ethnic-panel__content">
+                    <span class="ethnic-panel__eyebrow">Cộng đồng chủ thể</span>
+                    <h3 class="ethnic-panel__title">Người Kinh (Việt)</h3>
+                    <div class="ethnic-stats" aria-label="Số liệu người Kinh">
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">~92%</span>
+                        <span class="ethnic-stat__label">dân số</span>
+                      </span>
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">Tiếng Việt</span>
+                        <span class="ethnic-stat__label">ngôn ngữ</span>
+                      </span>
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">Toàn vùng</span>
+                        <span class="ethnic-stat__label">phân bố</span>
+                      </span>
+                    </div>
+                    <ul class="ethnic-list">
+                      <li><strong>Chiếm khoảng 92% dân số</strong> sau sáp nhập Quảng Nam vào Đà Nẵng.</li>
+                      <li><strong>Ngôn ngữ:</strong> tiếng Việt, với giọng Quảng Nam - Đà Nẵng giàu sắc thái địa phương.</li>
+                      <li><strong>Phân bố:</strong> toàn khu vực, tập trung tại nội thành, duyên hải và các đô thị di sản.</li>
+                      <li><strong>Văn hóa:</strong> lễ hội Cầu Ngư, Mì Quảng, Cao Lầu Hội An, bánh tráng cuốn thịt heo.</li>
+                    </ul>
+                  </div>
+                  <figure class="ethnic-media">
+                    <img
+                      class="ethnic-media__image"
+                      src="https://upload.wikimedia.org/wikipedia/commons/6/65/Woman_wearing_Ao_Dai.jpg"
+                      alt="Phụ nữ mặc áo dài tại Hội An"
+                      loading="lazy"
+                    />
+                    <figcaption class="ethnic-media__caption">Áo dài tại Hội An, một biểu tượng thị giác quen thuộc của văn hóa Việt.</figcaption>
+                  </figure>
+                </div>
+              </article>
+
+              <article
+                class="ethnic-panel"
+                id="ethnic-panel-cotu"
+                role="tabpanel"
+                aria-labelledby="ethnic-tab-cotu"
+                data-ethnic-panel="cotu"
+                hidden
+              >
+                <div class="ethnic-panel__grid">
+                  <div class="ethnic-panel__content">
+                    <span class="ethnic-panel__eyebrow">Miền núi phía tây</span>
+                    <h3 class="ethnic-panel__title">Người Cơ Tu</h3>
+                    <div class="ethnic-stats" aria-label="Số liệu người Cơ Tu">
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">~20.000</span>
+                        <span class="ethnic-stat__label">người</span>
+                      </span>
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">Nam Á</span>
+                        <span class="ethnic-stat__label">ngữ hệ</span>
+                      </span>
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">Zara</span>
+                        <span class="ethnic-stat__label">dệt thổ cẩm</span>
+                      </span>
+                    </div>
+                    <ul class="ethnic-list">
+                      <li><strong>Dân số:</strong> khoảng 20.000 người tại Đà Nẵng cũ và Quảng Nam cũ.</li>
+                      <li><strong>Phân bố:</strong> Hòa Vang, Đông Giang, Tây Giang, Nam Giang và các vùng núi giáp Lào.</li>
+                      <li><strong>Ngôn ngữ:</strong> tiếng Cơ Tu, thuộc ngữ hệ Nam Á.</li>
+                      <li><strong>Văn hóa:</strong> nhà Gươl cộng đồng, trang phục thổ cẩm đỏ - đen, múa tâng tung da dá.</li>
+                      <li><strong>Nghề truyền thống:</strong> dệt thổ cẩm, đan lát, săn bắn và tri thức rừng.</li>
+                    </ul>
+                  </div>
+                  <figure class="ethnic-media">
+                    <img
+                      class="ethnic-media__image"
+                      src="https://upload.wikimedia.org/wikipedia/commons/1/1e/Guol_Co_Tu.png"
+                      alt="Nhà Gươl của người Cơ Tu"
+                      loading="lazy"
+                    />
+                    <figcaption class="ethnic-media__caption">Nhà Gươl, không gian cộng đồng trung tâm trong đời sống văn hóa Cơ Tu.</figcaption>
+                  </figure>
+                </div>
+              </article>
+
+              <article
+                class="ethnic-panel"
+                id="ethnic-panel-xodang"
+                role="tabpanel"
+                aria-labelledby="ethnic-tab-xodang"
+                data-ethnic-panel="xodang"
+                hidden
+              >
+                <div class="ethnic-panel__grid">
+                  <div class="ethnic-panel__content">
+                    <span class="ethnic-panel__eyebrow">Trung du và miền núi</span>
+                    <h3 class="ethnic-panel__title">Người Xơ Đăng & Giẻ Triêng</h3>
+                    <div class="ethnic-stats" aria-label="Số liệu người Xơ Đăng và Giẻ Triêng">
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">~15.000</span>
+                        <span class="ethnic-stat__label">người</span>
+                      </span>
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">Phước Sơn</span>
+                        <span class="ethnic-stat__label">phân bố</span>
+                      </span>
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">Cồng chiêng</span>
+                        <span class="ethnic-stat__label">di sản</span>
+                      </span>
+                    </div>
+                    <ul class="ethnic-list">
+                      <li><strong>Dân số:</strong> khoảng 15.000 người, chủ yếu ở địa bàn Quảng Nam cũ.</li>
+                      <li><strong>Phân bố:</strong> Phước Sơn, Nam Giang và các khu vực miền núi lân cận.</li>
+                      <li><strong>Văn hóa:</strong> sắc thái nhà rông, cồng chiêng Tây Nguyên phía nam và lễ hội theo mùa vụ.</li>
+                      <li><strong>Nghề:</strong> trồng lúa nước, dệt vải, đúc đồng và các nghề gắn với kinh tế nương rẫy.</li>
+                    </ul>
+                  </div>
+                  <figure class="ethnic-media">
+                    <img
+                      class="ethnic-media__image"
+                      src="https://upload.wikimedia.org/wikipedia/commons/1/12/Trang_phuc_Xo_Dang.jpg"
+                      alt="Trang phục truyền thống của người Xơ Đăng"
+                      loading="lazy"
+                    />
+                    <figcaption class="ethnic-media__caption">Trang phục Xơ Đăng, gợi nhắc hệ hoa văn và màu sắc của vùng núi Trường Sơn.</figcaption>
+                  </figure>
+                </div>
+              </article>
+
+              <article
+                class="ethnic-panel"
+                id="ethnic-panel-hoa"
+                role="tabpanel"
+                aria-labelledby="ethnic-tab-hoa"
+                data-ethnic-panel="hoa"
+                hidden
+              >
+                <div class="ethnic-panel__grid">
+                  <div class="ethnic-panel__content">
+                    <span class="ethnic-panel__eyebrow">Thương cảng Hội An</span>
+                    <h3 class="ethnic-panel__title">Người Hoa</h3>
+                    <div class="ethnic-stats" aria-label="Số liệu người Hoa">
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">~5.000</span>
+                        <span class="ethnic-stat__label">người</span>
+                      </span>
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">Hội An</span>
+                        <span class="ethnic-stat__label">trung tâm</span>
+                      </span>
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">Nguyên Tiêu</span>
+                        <span class="ethnic-stat__label">lễ hội</span>
+                      </span>
+                    </div>
+                    <ul class="ethnic-list">
+                      <li><strong>Dân số:</strong> khoảng 5.000 người, gồm cộng đồng Hội An truyền thống.</li>
+                      <li><strong>Hội An:</strong> từng là trung tâm người Hoa lớn nhất miền Trung trong lịch sử giao thương.</li>
+                      <li><strong>Văn hóa:</strong> hội quán Phúc Kiến, hội quán Quảng Đông, Chùa Cầu, lễ Nguyên Tiêu.</li>
+                      <li><strong>Di sản:</strong> góp phần hình thành phố cổ Hội An, Di sản UNESCO của vùng Đà Nẵng mới.</li>
+                    </ul>
+                  </div>
+                  <figure class="ethnic-media">
+                    <img
+                      class="ethnic-media__image"
+                      src="https://www.homepaylater.vn/static/d4f2c13637c198d9e593a3590e1b111b/22553/1_thanh_pho_hoi_an_duoc_unesco_cong_nhan_la_di_san_van_hoa_the_gioi_noi_tieng_voi_nhung_ngoi_nha_co_kinh_62c7183de4.jpg"
+                      alt="Hội quán Phúc Kiến tại Hội An"
+                      loading="lazy"
+                    />
+                    <figcaption class="ethnic-media__caption">Hội quán Phúc Kiến, một dấu ấn quan trọng của cộng đồng người Hoa tại Hội An.</figcaption>
+                  </figure>
+                </div>
+              </article>
+
+              <article
+                class="ethnic-panel"
+                id="ethnic-panel-cham"
+                role="tabpanel"
+                aria-labelledby="ethnic-tab-cham"
+                data-ethnic-panel="cham"
+                hidden
+              >
+                <div class="ethnic-panel__grid">
+                  <div class="ethnic-panel__content">
+                    <span class="ethnic-panel__eyebrow">Dấu ấn Champa</span>
+                    <h3 class="ethnic-panel__title">Người Chăm</h3>
+                    <div class="ethnic-stats" aria-label="Số liệu người Chăm">
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">Nhỏ</span>
+                        <span class="ethnic-stat__label">cộng đồng</span>
+                      </span>
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">Mỹ Sơn</span>
+                        <span class="ethnic-stat__label">di sản UNESCO</span>
+                      </span>
+                      <span class="ethnic-stat">
+                        <span class="ethnic-stat__value">Champa</span>
+                        <span class="ethnic-stat__label">kế thừa</span>
+                      </span>
+                    </div>
+                    <ul class="ethnic-list">
+                      <li><strong>Cộng đồng:</strong> quy mô nhỏ, kế thừa nhiều lớp văn hóa của Vương quốc Champa.</li>
+                      <li><strong>Di sản:</strong> Thánh địa Mỹ Sơn và các tháp Chăm rải rác trên địa bàn Quảng Nam cũ.</li>
+                      <li><strong>Nghề:</strong> dệt lụa Mỹ Sơn, gốm truyền thống và nghệ thuật trang trí mang dấu ấn Chăm.</li>
+                      <li><strong>Bản sắc:</strong> kiến trúc gạch, vũ điệu, điêu khắc và ký ức thung lũng thiêng miền Trung.</li>
+                    </ul>
+                  </div>
+                  <figure class="ethnic-media">
+                    <img
+                      class="ethnic-media__image"
+                      src="https://danangfantasticity.com/wp-content/uploads/2025/09/khu-den-thap-my-son-03-1024x576.jpg"
+                      alt="Tháp Chăm tại Thánh địa Mỹ Sơn"
+                      loading="lazy"
+                    />
+                    <figcaption class="ethnic-media__caption">Mỹ Sơn, quần thể đền tháp gắn với lịch sử Champa và văn hóa Chăm.</figcaption>
+                  </figure>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+        <section class="section map-section" id="map" aria-labelledby="map-title">
+          <div class="section__inner">
+            <div class="map-section__header">
+              <div>
+                <p class="section-label reveal">Bản đồ 2025</p>
+                <h2 class="section-title reveal" id="map-title">Khám Phá 34 Tỉnh Thành Việt Nam 2025.</h2>
+              </div>
+              <p class="map-section__intro reveal">
+                Theo Nghị quyết 202/2025/QH15, từ 01/07/2025 cả nước vận hành 34 đơn vị hành chính cấp tỉnh:
+                28 tỉnh và 6 thành phố trực thuộc Trung ương.
+              </p>
+            </div>
+
+            <div class="map-explorer reveal">
+              <div class="map-shell" aria-label="SVG bản đồ hành chính Việt Nam 2025 dạng schematic">
+                <svg class="vietnam-map" viewBox="0 0 340 980" role="img" aria-labelledby="vietnam-map-title vietnam-map-desc">
+                  <title id="vietnam-map-title">Bản đồ hành chính Việt Nam 2025</title>
+                  <desc id="vietnam-map-desc">Mỗi tỉnh thành là một path SVG riêng có thể chọn để xem thông tin chi tiết; bản đồ có bổ sung Hoàng Sa và Trường Sa của Việt Nam.</desc>
+                  <g>
+                    <path class="map-province" data-province="lai-chau" tabindex="0" role="button" aria-label="Lai Châu" d="M 78 43 L 85 38 L 121 45 L 126 71 L 118 80 L 82 74 Z"><title>Lai Châu</title></path>
+                    <path class="map-province" data-province="lao-cai" tabindex="0" role="button" aria-label="Lào Cai" d="M 138 39 L 145 34 L 181 41 L 186 67 L 178 76 L 142 70 Z"><title>Lào Cai</title></path>
+                    <path class="map-province" data-province="cao-bang" tabindex="0" role="button" aria-label="Cao Bằng" d="M 226 39 L 233 34 L 269 41 L 274 67 L 266 76 L 230 70 Z"><title>Cao Bằng</title></path>
+                    <path class="map-province" data-province="dien-bien" tabindex="0" role="button" aria-label="Điện Biên" d="M 42 97 L 49 92 L 85 99 L 90 125 L 82 134 L 46 128 Z"><title>Điện Biên</title></path>
+                    <path class="map-province" data-province="son-la" tabindex="0" role="button" aria-label="Sơn La" d="M 96 109 L 103 104 L 139 111 L 144 137 L 136 146 L 100 140 Z"><title>Sơn La</title></path>
+                    <path class="map-province" data-province="tuyen-quang" tabindex="0" role="button" aria-label="Tuyên Quang" d="M 154 91 L 161 86 L 197 93 L 202 119 L 194 128 L 158 122 Z"><title>Tuyên Quang</title></path>
+                    <path class="map-province" data-province="lang-son" tabindex="0" role="button" aria-label="Lạng Sơn" d="M 220 93 L 227 88 L 263 95 L 268 121 L 260 130 L 224 124 Z"><title>Lạng Sơn</title></path>
+                    <path class="map-province" data-province="quang-ninh" tabindex="0" role="button" aria-label="Quảng Ninh" d="M 278 123 L 285 118 L 321 125 L 326 151 L 318 160 L 282 154 Z"><title>Quảng Ninh</title></path>
+                    <path class="map-province" data-province="phu-tho" tabindex="0" role="button" aria-label="Phú Thọ" d="M 134 147 L 141 142 L 177 149 L 182 175 L 174 184 L 138 178 Z"><title>Phú Thọ</title></path>
+                    <path class="map-province" data-province="thai-nguyen" tabindex="0" role="button" aria-label="Thái Nguyên" d="M 194 141 L 201 136 L 237 143 L 242 169 L 234 178 L 198 172 Z"><title>Thái Nguyên</title></path>
+                    <path class="map-province" data-province="bac-ninh" tabindex="0" role="button" aria-label="Bắc Ninh" d="M 232 181 L 239 176 L 275 183 L 280 209 L 272 218 L 236 212 Z"><title>Bắc Ninh</title></path>
+                    <path class="map-province" data-province="ha-noi" tabindex="0" role="button" aria-label="Hà Nội" d="M 174 189 L 181 184 L 217 191 L 222 217 L 214 226 L 178 220 Z"><title>Hà Nội</title></path>
+                    <path class="map-province" data-province="hai-phong" tabindex="0" role="button" aria-label="Hải Phòng" d="M 270 195 L 277 190 L 313 197 L 318 223 L 310 232 L 274 226 Z"><title>Hải Phòng</title></path>
+                    <path class="map-province" data-province="hung-yen" tabindex="0" role="button" aria-label="Hưng Yên" d="M 212 225 L 219 220 L 255 227 L 260 253 L 252 262 L 216 256 Z"><title>Hưng Yên</title></path>
+                    <path class="map-province" data-province="ninh-binh" tabindex="0" role="button" aria-label="Ninh Bình" d="M 172 265 L 179 260 L 215 267 L 220 293 L 212 302 L 176 296 Z"><title>Ninh Bình</title></path>
+                    <path class="map-province" data-province="thanh-hoa" tabindex="0" role="button" aria-label="Thanh Hóa" d="M 150 315 L 157 310 L 193 317 L 198 343 L 190 352 L 154 346 Z"><title>Thanh Hóa</title></path>
+                    <path class="map-province" data-province="nghe-an" tabindex="0" role="button" aria-label="Nghệ An" d="M 138 370 L 145 365 L 181 372 L 186 398 L 178 407 L 142 401 Z"><title>Nghệ An</title></path>
+                    <path class="map-province" data-province="ha-tinh" tabindex="0" role="button" aria-label="Hà Tĩnh" d="M 156 425 L 163 420 L 199 427 L 204 453 L 196 462 L 160 456 Z"><title>Hà Tĩnh</title></path>
+                    <path class="map-province" data-province="quang-tri" tabindex="0" role="button" aria-label="Quảng Trị" d="M 174 480 L 181 475 L 217 482 L 222 508 L 214 517 L 178 511 Z"><title>Quảng Trị</title></path>
+                    <path class="map-province" data-province="hue" tabindex="0" role="button" aria-label="Huế" d="M 188 525 L 195 520 L 231 527 L 236 553 L 228 562 L 192 556 Z"><title>Huế</title></path>
+                    <path class="map-province map-province--current is-selected" data-province="da-nang" tabindex="0" role="button" aria-label="Đà Nẵng" d="M 204 565 L 211 560 L 247 567 L 252 593 L 244 602 L 208 596 Z"><title>Đà Nẵng</title></path>
+                    <path class="map-province" data-province="quang-ngai" tabindex="0" role="button" aria-label="Quảng Ngãi" d="M 194 611 L 201 606 L 237 613 L 242 639 L 234 648 L 198 642 Z"><title>Quảng Ngãi</title></path>
+                    <path class="map-province" data-province="gia-lai" tabindex="0" role="button" aria-label="Gia Lai" d="M 146 635 L 153 630 L 189 637 L 194 663 L 186 672 L 150 666 Z"><title>Gia Lai</title></path>
+                    <path class="map-province" data-province="dak-lak" tabindex="0" role="button" aria-label="Đắk Lắk" d="M 158 695 L 165 690 L 201 697 L 206 723 L 198 732 L 162 726 Z"><title>Đắk Lắk</title></path>
+                    <path class="map-province" data-province="khanh-hoa" tabindex="0" role="button" aria-label="Khánh Hòa" d="M 222 683 L 229 678 L 265 685 L 270 711 L 262 720 L 226 714 Z"><title>Khánh Hòa</title></path>
+                    <path class="map-province" data-province="lam-dong" tabindex="0" role="button" aria-label="Lâm Đồng" d="M 190 745 L 197 740 L 233 747 L 238 773 L 230 782 L 194 776 Z"><title>Lâm Đồng</title></path>
+                    <path class="map-province" data-province="tay-ninh" tabindex="0" role="button" aria-label="Tây Ninh" d="M 140 785 L 147 780 L 183 787 L 188 813 L 180 822 L 144 816 Z"><title>Tây Ninh</title></path>
+                    <path class="map-province" data-province="dong-nai" tabindex="0" role="button" aria-label="Đồng Nai" d="M 214 787 L 221 782 L 257 789 L 262 815 L 254 824 L 218 818 Z"><title>Đồng Nai</title></path>
+                    <path class="map-province" data-province="ho-chi-minh" tabindex="0" role="button" aria-label="TP.HCM" d="M 190 833 L 197 828 L 233 835 L 238 861 L 230 870 L 194 864 Z"><title>TP.HCM</title></path>
+                    <path class="map-province" data-province="dong-thap" tabindex="0" role="button" aria-label="Đồng Tháp" d="M 126 837 L 133 832 L 169 839 L 174 865 L 166 874 L 130 868 Z"><title>Đồng Tháp</title></path>
+                    <path class="map-province" data-province="an-giang" tabindex="0" role="button" aria-label="An Giang" d="M 76 825 L 83 820 L 119 827 L 124 853 L 116 862 L 80 856 Z"><title>An Giang</title></path>
+                    <path class="map-province" data-province="can-tho" tabindex="0" role="button" aria-label="Cần Thơ" d="M 114 883 L 121 878 L 157 885 L 162 911 L 154 920 L 118 914 Z"><title>Cần Thơ</title></path>
+                    <path class="map-province" data-province="vinh-long" tabindex="0" role="button" aria-label="Vĩnh Long" d="M 166 883 L 173 878 L 209 885 L 214 911 L 206 920 L 170 914 Z"><title>Vĩnh Long</title></path>
+                    <path class="map-province" data-province="ca-mau" tabindex="0" role="button" aria-label="Cà Mau" d="M 126 929 L 133 924 L 169 931 L 174 957 L 166 966 L 130 960 Z"><title>Cà Mau</title></path>
+                  </g>
+                  <g class="map-islands" aria-label="Hoàng Sa và Trường Sa của Việt Nam">
+                    <g>
+                      <title>Quần đảo Hoàng Sa của Việt Nam</title>
+                      <path class="map-island-ring" d="M 280 548 C 294 537 316 542 323 559 C 329 575 319 596 300 600 C 282 604 269 591 270 574 C 271 563 274 555 280 548 Z"></path>
+                      <line class="map-island-line" x1="254" y1="584" x2="282" y2="572"></line>
+                      <circle class="map-island-dot" cx="291" cy="568" r="3.3"></circle>
+                      <circle class="map-island-dot" cx="305" cy="575" r="2.6"></circle>
+                      <circle class="map-island-dot" cx="295" cy="588" r="2.4"></circle>
+                      <circle class="map-island-dot" cx="314" cy="591" r="2.2"></circle>
+                      <text class="map-island-label" x="302" y="542">Hoàng Sa</text>
+                    </g>
+                    <g>
+                      <title>Quần đảo Trường Sa của Việt Nam</title>
+                      <path class="map-island-ring" d="M 275 720 C 292 703 322 713 329 740 C 338 774 322 853 301 880 C 281 858 267 797 264 759 C 263 742 267 728 275 720 Z"></path>
+                      <line class="map-island-line" x1="269" y1="714" x2="286" y2="730"></line>
+                      <circle class="map-island-dot" cx="290" cy="736" r="2.7"></circle>
+                      <circle class="map-island-dot" cx="314" cy="754" r="2.4"></circle>
+                      <circle class="map-island-dot" cx="283" cy="781" r="2.2"></circle>
+                      <circle class="map-island-dot" cx="322" cy="808" r="2.6"></circle>
+                      <circle class="map-island-dot" cx="301" cy="832" r="2.2"></circle>
+                      <circle class="map-island-dot" cx="316" cy="864" r="2.4"></circle>
+                      <text class="map-island-label" x="302" y="712">Trường Sa</text>
+                    </g>
+                  </g>
+                </svg>
+                <p class="map-note">Bản đồ biểu diễn 34 đơn vị cấp tỉnh theo dữ liệu hành chính năm 2025, kèm Hoàng Sa và Trường Sa của Việt Nam; màu vàng là mục đang được chọn.</p>
+              </div>
+
+              <aside class="province-list" aria-label="Danh sách 33 tỉnh thành còn lại">
+                <div class="province-group">
+                  <h3 class="province-group__title">Trang hiện tại</h3>
+                  <div class="province-pills">
+                    <button class="province-pill province-pill--current is-active" type="button" data-province="da-nang">Đà Nẵng</button>
+                  </div>
+                </div>
+
+                <div class="province-group">
+                  <h3 class="province-group__title">6 thành phố trực thuộc Trung ương</h3>
+                  <div class="province-pills">
+                    <button class="province-pill" type="button" data-province="ha-noi">Hà Nội</button>
+                    <button class="province-pill" type="button" data-province="ho-chi-minh">TP. Hồ Chí Minh*</button>
+                    <button class="province-pill" type="button" data-province="hai-phong">Hải Phòng*</button>
+                    <button class="province-pill" type="button" data-province="can-tho">Cần Thơ*</button>
+                    <button class="province-pill" type="button" data-province="hue">Huế</button>
+                  </div>
+                </div>
+
+                <div class="province-group">
+                  <h3 class="province-group__title">Miền Bắc</h3>
+                  <div class="province-pills">
+                    <button class="province-pill" type="button" data-province="tuyen-quang">Tuyên Quang*</button>
+                    <button class="province-pill" type="button" data-province="lao-cai">Lào Cai*</button>
+                    <button class="province-pill" type="button" data-province="thai-nguyen">Thái Nguyên*</button>
+                    <button class="province-pill" type="button" data-province="phu-tho">Phú Thọ*</button>
+                    <button class="province-pill" type="button" data-province="bac-ninh">Bắc Ninh*</button>
+                    <button class="province-pill" type="button" data-province="hung-yen">Hưng Yên*</button>
+                    <button class="province-pill" type="button" data-province="ninh-binh">Ninh Bình*</button>
+                    <button class="province-pill" type="button" data-province="lai-chau">Lai Châu</button>
+                    <button class="province-pill" type="button" data-province="dien-bien">Điện Biên</button>
+                    <button class="province-pill" type="button" data-province="son-la">Sơn La</button>
+                    <button class="province-pill" type="button" data-province="cao-bang">Cao Bằng</button>
+                    <button class="province-pill" type="button" data-province="lang-son">Lạng Sơn</button>
+                    <button class="province-pill" type="button" data-province="quang-ninh">Quảng Ninh</button>
+                    <button class="province-pill" type="button" data-province="thanh-hoa">Thanh Hóa</button>
+                  </div>
+                </div>
+
+                <div class="province-group">
+                  <h3 class="province-group__title">Miền Trung</h3>
+                  <div class="province-pills">
+                    <button class="province-pill" type="button" data-province="nghe-an">Nghệ An</button>
+                    <button class="province-pill" type="button" data-province="ha-tinh">Hà Tĩnh</button>
+                    <button class="province-pill" type="button" data-province="quang-tri">Quảng Trị*</button>
+                    <button class="province-pill" type="button" data-province="quang-ngai">Quảng Ngãi*</button>
+                    <button class="province-pill" type="button" data-province="gia-lai">Gia Lai*</button>
+                    <button class="province-pill" type="button" data-province="khanh-hoa">Khánh Hòa*</button>
+                    <button class="province-pill" type="button" data-province="dak-lak">Đắk Lắk*</button>
+                    <button class="province-pill" type="button" data-province="lam-dong">Lâm Đồng*</button>
+                  </div>
+                </div>
+
+                <div class="province-group">
+                  <h3 class="province-group__title">Miền Nam</h3>
+                  <div class="province-pills">
+                    <button class="province-pill" type="button" data-province="dong-nai">Đồng Nai*</button>
+                    <button class="province-pill" type="button" data-province="tay-ninh">Tây Ninh*</button>
+                    <button class="province-pill" type="button" data-province="vinh-long">Vĩnh Long*</button>
+                    <button class="province-pill" type="button" data-province="dong-thap">Đồng Tháp*</button>
+                    <button class="province-pill" type="button" data-province="an-giang">An Giang*</button>
+                    <button class="province-pill" type="button" data-province="ca-mau">Cà Mau*</button>
+                  </div>
+                </div>
+
+                <p class="admin__footnote">* = đơn vị cấp tỉnh hình thành sau sắp xếp năm 2025.</p>
+              </aside>
+            </div>
+
+            <article class="province-detail is-visible" id="province-detail" aria-live="polite">
+              <div class="province-detail__inner"></div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer" id="contact" aria-label="Chân trang">
+        <div class="site-footer__inner">
+          <div class="site-footer__top">
+            <a class="footer-brand" href="#hero" aria-label="Về đầu trang">
+              <span class="footer-brand__mark" aria-hidden="true">🇻🇳</span>
+              Việt Nam Explorer
+            </a>
+
+            <nav class="footer-nav" aria-label="Liên kết chân trang">
+              <a href="#hero">Trang chủ</a>
+              <a href="#map">Bản đồ</a>
+              <a href="#ethnic">Dân tộc</a>
+              <a href="#contact">Liên hệ</a>
+            </nav>
+          </div>
+
+          <div class="site-footer__bottom">
+            <p class="site-footer__source">
+              Dữ liệu cập nhật theo <strong>Nghị quyết 202/2025/QH15</strong> — Hiệu lực 01/07/2025.
+            </p>
+            <p class="site-footer__copyright">Single-page experience về Đà Nẵng, Việt Nam.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.22 }
+      );
+
+      document.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
+
+      const hero = document.querySelector(".hero");
+
+      if (!prefersReducedMotion && hero) {
+        const updateParallax = () => {
+          const progress = Math.min(1, Math.max(0, window.scrollY / window.innerHeight));
+          hero.style.setProperty("--hero-shift", `${progress * 42}px`);
+        };
+
+        updateParallax();
+        window.addEventListener("scroll", updateParallax, { passive: true });
+      }
+
+      const dragon = document.querySelector("[data-dragon]");
+      const dragonCanvas = document.querySelector("[data-dragon-canvas]");
+
+      const initCanvasDragon = (canvas) => {
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        const width = 720;
+        const height = 320;
+        let tick = 0;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const drawSmoothPath = (points, strokeStyle, lineWidth, shadow = null) => {
+          ctx.save();
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          ctx.strokeStyle = strokeStyle;
+          ctx.lineWidth = lineWidth;
+
+          if (shadow) {
+            ctx.shadowColor = shadow.color;
+            ctx.shadowBlur = shadow.blur;
+          }
+
+          ctx.beginPath();
+          ctx.moveTo(points[0].x, points[0].y);
+          for (let i = 1; i < points.length - 2; i += 1) {
+            const midX = (points[i].x + points[i + 1].x) / 2;
+            const midY = (points[i].y + points[i + 1].y) / 2;
+            ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
+          }
+          const last = points[points.length - 1];
+          ctx.lineTo(last.x, last.y);
+          ctx.stroke();
+          ctx.restore();
+        };
+
+        const drawTriangle = (a, b, c, fillStyle, strokeStyle = null) => {
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.lineTo(c.x, c.y);
+          ctx.closePath();
+          ctx.fillStyle = fillStyle;
+          ctx.fill();
+          if (strokeStyle) {
+            ctx.strokeStyle = strokeStyle;
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+          }
+        };
+
+        const drawWing = (root, flap, behind = true) => {
+          const side = behind ? -1 : 1;
+          const lift = flap * (behind ? 36 : 46);
+          const tip = { x: root.x - 78, y: root.y - 112 - lift * side };
+          const far = { x: root.x + 92, y: root.y - 70 - lift };
+          const lower = { x: root.x + 58, y: root.y + 16 + lift * 0.16 };
+
+          ctx.save();
+          ctx.globalAlpha = behind ? 0.58 : 0.76;
+          ctx.fillStyle = behind ? "rgba(148, 46, 33, 0.58)" : "rgba(201, 169, 110, 0.62)";
+          ctx.strokeStyle = behind ? "rgba(248, 243, 232, 0.28)" : "rgba(248, 243, 232, 0.46)";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(root.x, root.y);
+          ctx.bezierCurveTo(root.x - 28, root.y - 42, tip.x + 26, tip.y - 20, tip.x, tip.y);
+          ctx.bezierCurveTo(tip.x + 78, tip.y + 30, far.x - 24, far.y - 6, far.x, far.y);
+          ctx.bezierCurveTo(root.x + 78, root.y - 16, lower.x + 18, lower.y, root.x, root.y);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.strokeStyle = "rgba(248, 243, 232, 0.3)";
+          ctx.lineWidth = 1.2;
+          [0.22, 0.42, 0.62, 0.82].forEach((ratio) => {
+            ctx.beginPath();
+            ctx.moveTo(root.x, root.y);
+            ctx.lineTo(root.x + (far.x - root.x) * ratio, root.y + (far.y - root.y) * ratio - 18 * Math.sin(ratio * Math.PI));
+            ctx.stroke();
+          });
+          ctx.restore();
+        };
+
+        const drawLeg = (root, phase) => {
+          ctx.save();
+          ctx.strokeStyle = "rgba(143, 72, 43, 0.92)";
+          ctx.lineWidth = 8;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(root.x, root.y + 12);
+          ctx.quadraticCurveTo(root.x - 4, root.y + 42 + Math.sin(phase) * 8, root.x - 28, root.y + 58);
+          ctx.stroke();
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.moveTo(root.x - 28, root.y + 58);
+          ctx.lineTo(root.x - 45, root.y + 54);
+          ctx.moveTo(root.x - 28, root.y + 58);
+          ctx.lineTo(root.x - 36, root.y + 70);
+          ctx.stroke();
+          ctx.restore();
+        };
+
+        const drawDragon = () => {
+          tick += 0.018;
+          ctx.clearRect(0, 0, width, height);
+
+          const points = [];
+          for (let i = 0; i < 32; i += 1) {
+            const t = i / 31;
+            points.push({
+              x: 604 - t * 510,
+              y:
+                158 +
+                Math.sin(t * Math.PI * 3.35 + tick * 2.2) * 30 +
+                Math.sin(t * 11 + tick * 4.3) * 5
+            });
+          }
+
+          const bodyGradient = ctx.createLinearGradient(90, 0, 620, 0);
+          bodyGradient.addColorStop(0, "#5b0f0f");
+          bodyGradient.addColorStop(0.34, "#8f1d17");
+          bodyGradient.addColorStop(0.7, "#c9a96e");
+          bodyGradient.addColorStop(1, "#fff7d8");
+
+          drawWing(points[10], Math.sin(tick * 8.5), true);
+
+          drawSmoothPath(points, bodyGradient, 36, { color: "rgba(232, 201, 122, 0.55)", blur: 18 });
+          drawSmoothPath(points, "rgba(255, 247, 216, 0.74)", 8);
+          drawSmoothPath(points, "rgba(56, 189, 248, 0.22)", 3);
+
+          drawWing(points[10], Math.sin(tick * 8.5), false);
+
+          for (let i = 3; i < points.length - 4; i += 2) {
+            const prev = points[i - 1];
+            const curr = points[i];
+            const next = points[i + 1];
+            const dx = next.x - prev.x;
+            const dy = next.y - prev.y;
+            const len = Math.hypot(dx, dy) || 1;
+            let nx = -dy / len;
+            let ny = dx / len;
+            if (ny > 0) {
+              nx *= -1;
+              ny *= -1;
+            }
+            const tx = dx / len;
+            const ty = dy / len;
+            const size = 15 - i * 0.18;
+            drawTriangle(
+              { x: curr.x - tx * 7, y: curr.y - ty * 7 },
+              { x: curr.x + tx * 7, y: curr.y + ty * 7 },
+              { x: curr.x + nx * size, y: curr.y + ny * size },
+              i % 4 === 1 ? "#fff7d8" : "#c9a96e",
+              "rgba(5, 13, 26, 0.28)"
+            );
+          }
+
+          drawLeg(points[9], tick * 4);
+          drawLeg(points[14], tick * 4 + Math.PI * 0.8);
+
+          const tail = points[points.length - 1];
+          drawTriangle(
+            { x: tail.x - 8, y: tail.y },
+            { x: tail.x - 44, y: tail.y - 18 },
+            { x: tail.x - 34, y: tail.y + 24 },
+            "#c9a96e",
+            "rgba(248, 243, 232, 0.4)"
+          );
+
+          const head = points[0];
+          ctx.save();
+          ctx.translate(head.x + 14, head.y);
+          ctx.rotate(Math.sin(tick * 3) * 0.05);
+
+          const flame = 0.85 + Math.sin(tick * 18) * 0.15;
+          ctx.save();
+          ctx.translate(46, 2);
+          ctx.scale(flame, 1 + (1 - flame) * 0.4);
+          const flameGradient = ctx.createLinearGradient(0, 0, 92, 0);
+          flameGradient.addColorStop(0, "#fff7d8");
+          flameGradient.addColorStop(0.48, "#e8c97a");
+          flameGradient.addColorStop(1, "#f97316");
+          ctx.fillStyle = flameGradient;
+          ctx.globalAlpha = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.bezierCurveTo(32, -22, 58, -18, 88, -4);
+          ctx.bezierCurveTo(58, 6, 34, 20, 0, 8);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+
+          ctx.fillStyle = "#c9a96e";
+          ctx.strokeStyle = "rgba(255, 247, 216, 0.82)";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.ellipse(8, 0, 38, 28, 0.08, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = "#fff7d8";
+          drawTriangle({ x: -10, y: -21 }, { x: 2, y: -58 }, { x: 12, y: -19 }, "#fff7d8", "#c9a96e");
+          drawTriangle({ x: 18, y: -17 }, { x: 38, y: -48 }, { x: 38, y: -8 }, "#fff7d8", "#c9a96e");
+
+          ctx.fillStyle = "#07111f";
+          ctx.beginPath();
+          ctx.arc(20, -7, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#fff7d8";
+          ctx.beginPath();
+          ctx.arc(21.5, -8.5, 1.4, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = "#6b3c1f";
+          ctx.lineWidth = 3;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(22, 14);
+          ctx.quadraticCurveTo(8, 22, -10, 15);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#a5f3fc";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(-4, 8);
+          ctx.bezierCurveTo(-34, 14, -46, 32, -60, 50 + Math.sin(tick * 4) * 4);
+          ctx.moveTo(4, 18);
+          ctx.bezierCurveTo(-22, 36, -28, 54, -38, 76 + Math.cos(tick * 4) * 4);
+          ctx.stroke();
+          ctx.restore();
+
+          for (let i = 0; i < 10; i += 1) {
+            const emberPhase = (tick * 2.4 + i * 0.33) % 1;
+            const x = head.x + 80 + emberPhase * 78;
+            const y = head.y + Math.sin(i * 1.7 + tick * 8) * 22;
+            ctx.globalAlpha = 1 - emberPhase;
+            ctx.fillStyle = i % 2 ? "#a5f3fc" : "#e8c97a";
+            ctx.beginPath();
+            ctx.arc(x, y, 2.8 + (i % 3), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+
+          requestAnimationFrame(drawDragon);
+        };
+
+        drawDragon();
+      };
+
+      const initProcessingStyleDragon = (canvas) => {
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        const width = 720;
+        const height = 320;
+        let tick = 0;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ellipseAt = (point, rx, ry, angle, fillStyle, strokeStyle = null, lineWidth = 1) => {
+          ctx.save();
+          ctx.translate(point.x, point.y);
+          ctx.rotate(angle);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+          ctx.fillStyle = fillStyle;
+          ctx.fill();
+          if (strokeStyle) {
+            ctx.strokeStyle = strokeStyle;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+          }
+          ctx.restore();
+        };
+
+        const triangle = (a, b, c, fillStyle, strokeStyle = null) => {
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.lineTo(c.x, c.y);
+          ctx.closePath();
+          ctx.fillStyle = fillStyle;
+          ctx.fill();
+          if (strokeStyle) {
+            ctx.strokeStyle = strokeStyle;
+            ctx.lineWidth = 1.4;
+            ctx.stroke();
+          }
+        };
+
+        const curve = (points, style, widthValue, alpha = 1) => {
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = style;
+          ctx.lineWidth = widthValue;
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          ctx.beginPath();
+          ctx.moveTo(points[0].x, points[0].y);
+          for (let i = 1; i < points.length - 2; i += 1) {
+            const midX = (points[i].x + points[i + 1].x) / 2;
+            const midY = (points[i].y + points[i + 1].y) / 2;
+            ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
+          }
+          ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+          ctx.stroke();
+          ctx.restore();
+        };
+
+        const drawWing = (root, flap) => {
+          const lift = Math.sin(flap) * 34;
+          const base = { x: root.x - 4, y: root.y + 4 };
+          const tip = { x: root.x - 122, y: root.y - 104 - lift };
+          const top = { x: root.x - 24, y: root.y - 72 - lift * 0.45 };
+          const far = { x: root.x + 108, y: root.y - 60 + lift * 0.2 };
+          const lower = { x: root.x + 72, y: root.y + 24 + lift * 0.18 };
+
+          ctx.save();
+          ctx.globalAlpha = 0.78;
+          ctx.fillStyle = "rgba(106, 22, 25, 0.7)";
+          ctx.strokeStyle = "rgba(255, 247, 216, 0.42)";
+          ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          ctx.moveTo(base.x, base.y);
+          ctx.bezierCurveTo(root.x - 56, root.y - 42, top.x - 28, top.y - 36, tip.x, tip.y);
+          ctx.bezierCurveTo(tip.x + 74, tip.y + 18, far.x - 36, far.y - 12, far.x, far.y);
+          ctx.bezierCurveTo(root.x + 80, root.y - 2, lower.x + 12, lower.y, base.x, base.y);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.strokeStyle = "rgba(248, 243, 232, 0.28)";
+          ctx.lineWidth = 1.2;
+          [0.18, 0.36, 0.54, 0.72, 0.9].forEach((ratio) => {
+            ctx.beginPath();
+            ctx.moveTo(base.x, base.y);
+            ctx.lineTo(
+              tip.x + (far.x - tip.x) * ratio,
+              tip.y + (far.y - tip.y) * ratio + Math.sin(ratio * Math.PI) * 18
+            );
+            ctx.stroke();
+          });
+          ctx.restore();
+        };
+
+        const drawClaw = (root, phase, front = true) => {
+          ctx.save();
+          ctx.strokeStyle = front ? "rgba(112, 47, 31, 0.96)" : "rgba(92, 40, 30, 0.8)";
+          ctx.lineWidth = front ? 8 : 6;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(root.x, root.y + 10);
+          ctx.bezierCurveTo(root.x - 4, root.y + 38, root.x - 24, root.y + 48 + Math.sin(phase) * 8, root.x - 45, root.y + 56);
+          ctx.stroke();
+
+          ctx.strokeStyle = "rgba(255, 247, 216, 0.84)";
+          ctx.lineWidth = 2.2;
+          for (let i = 0; i < 3; i += 1) {
+            ctx.beginPath();
+            ctx.moveTo(root.x - 42, root.y + 56);
+            ctx.lineTo(root.x - 57 - i * 4, root.y + 52 + i * 9);
+            ctx.stroke();
+          }
+          ctx.restore();
+        };
+
+        const drawProcessingDragon = () => {
+          tick += 0.018;
+          ctx.clearRect(0, 0, width, height);
+
+          const points = [];
+          for (let i = 0; i < 36; i += 1) {
+            const t = i / 35;
+            points.push({
+              x: 606 - t * 520,
+              y: 160 + Math.sin(t * Math.PI * 3.1 + tick * 2.25) * 36 + Math.sin(t * 18 + tick * 3.6) * 5,
+              t
+            });
+          }
+
+          ctx.save();
+          ctx.shadowColor = "rgba(232, 201, 122, 0.5)";
+          ctx.shadowBlur = 22;
+          curve(points, "rgba(232, 201, 122, 0.24)", 54, 0.65);
+          ctx.restore();
+
+          drawWing(points[10], tick * 8.4);
+
+          const bodyGradient = ctx.createLinearGradient(80, 0, 620, 0);
+          bodyGradient.addColorStop(0, "#4b0d14");
+          bodyGradient.addColorStop(0.34, "#8f1517");
+          bodyGradient.addColorStop(0.68, "#b76431");
+          bodyGradient.addColorStop(1, "#e8c97a");
+          curve(points, bodyGradient, 27);
+          curve(points, "rgba(255, 247, 216, 0.82)", 6, 0.85);
+
+          for (let i = points.length - 1; i >= 2; i -= 1) {
+            const p = points[i];
+            const prev = points[Math.max(0, i - 1)];
+            const next = points[Math.min(points.length - 1, i + 1)];
+            const angle = Math.atan2(next.y - prev.y, next.x - prev.x);
+            const radius = 13 + (1 - p.t) * 6;
+            const shade = i % 2 === 0 ? "rgba(143, 21, 23, 0.7)" : "rgba(201, 169, 110, 0.32)";
+            ellipseAt(p, radius * 0.88, radius * 0.42, angle, shade);
+          }
+
+          for (let i = 4; i < points.length - 4; i += 2) {
+            const p = points[i];
+            const prev = points[i - 1];
+            const next = points[i + 1];
+            const angle = Math.atan2(next.y - prev.y, next.x - prev.x) - Math.PI / 2;
+            const size = 18 - i * 0.22;
+            const baseA = { x: p.x + Math.cos(angle + Math.PI / 2) * 8, y: p.y + Math.sin(angle + Math.PI / 2) * 8 };
+            const baseB = { x: p.x + Math.cos(angle - Math.PI / 2) * 8, y: p.y + Math.sin(angle - Math.PI / 2) * 8 };
+            const tip = { x: p.x + Math.cos(angle) * size, y: p.y + Math.sin(angle) * size };
+            triangle(baseA, baseB, tip, i % 4 === 0 ? "#fff7d8" : "#c9a96e", "rgba(5, 13, 26, 0.22)");
+          }
+
+          drawClaw(points[11], tick * 5, false);
+          drawClaw(points[16], tick * 5 + Math.PI, true);
+
+          const tail = points[points.length - 1];
+          triangle(
+            { x: tail.x - 2, y: tail.y },
+            { x: tail.x - 48, y: tail.y - 20 },
+            { x: tail.x - 36, y: tail.y + 26 },
+            "#d5b16e",
+            "rgba(255, 247, 216, 0.5)"
+          );
+
+          const head = points[0];
+          ctx.save();
+          ctx.translate(head.x + 18, head.y);
+          ctx.rotate(Math.sin(tick * 3.2) * 0.05);
+
+          const flamePulse = 0.9 + Math.sin(tick * 18) * 0.12;
+          const flameGradient = ctx.createLinearGradient(36, 0, 134, 0);
+          flameGradient.addColorStop(0, "#fff7d8");
+          flameGradient.addColorStop(0.45, "#e8c97a");
+          flameGradient.addColorStop(1, "#ef4444");
+          ctx.save();
+          ctx.scale(flamePulse, 1);
+          ctx.fillStyle = flameGradient;
+          ctx.globalAlpha = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(44, -2);
+          ctx.bezierCurveTo(74, -28, 110, -22, 142, -4);
+          ctx.bezierCurveTo(108, 8, 82, 24, 44, 10);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+
+          ctx.fillStyle = "#d6a24f";
+          ctx.strokeStyle = "rgba(255, 247, 216, 0.86)";
+          ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          ctx.moveTo(-25, -6);
+          ctx.bezierCurveTo(-18, -31, 20, -39, 44, -24);
+          ctx.lineTo(66, -6);
+          ctx.lineTo(42, 20);
+          ctx.bezierCurveTo(16, 32, -17, 23, -30, 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          triangle({ x: -10, y: -28 }, { x: 4, y: -70 }, { x: 18, y: -29 }, "#fff7d8", "#c9a96e");
+          triangle({ x: 30, y: -24 }, { x: 57, y: -58 }, { x: 50, y: -16 }, "#fff7d8", "#c9a96e");
+          triangle({ x: 50, y: 4 }, { x: 72, y: -4 }, { x: 50, y: 14 }, "#fff7d8", "#c9a96e");
+
+          ctx.fillStyle = "#06111f";
+          ctx.beginPath();
+          ctx.arc(28, -9, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#fff7d8";
+          ctx.beginPath();
+          ctx.arc(29.5, -10.5, 1.4, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = "#6b2f1f";
+          ctx.lineWidth = 3.2;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(36, 14);
+          ctx.quadraticCurveTo(20, 27, -4, 16);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#a5f3fc";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(-6, 8);
+          ctx.bezierCurveTo(-42, 15, -60, 44, -78, 64 + Math.sin(tick * 4) * 5);
+          ctx.moveTo(6, 19);
+          ctx.bezierCurveTo(-22, 42, -32, 70, -42, 94 + Math.cos(tick * 4) * 5);
+          ctx.stroke();
+          ctx.restore();
+
+          for (let i = 0; i < 14; i += 1) {
+            const phase = (tick * 2.6 + i * 0.21) % 1;
+            const emberX = head.x + 96 + phase * 112;
+            const emberY = head.y + Math.sin(i * 1.4 + tick * 8.5) * 28;
+            ctx.globalAlpha = 1 - phase;
+            ctx.fillStyle = i % 3 === 0 ? "#a5f3fc" : i % 2 ? "#e8c97a" : "#ef4444";
+            ctx.beginPath();
+            ctx.arc(emberX, emberY, 2 + (i % 4), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+
+          requestAnimationFrame(drawProcessingDragon);
+        };
+
+        drawProcessingDragon();
+      };
+
+      if (!prefersReducedMotion && dragonCanvas) {
+        initProcessingStyleDragon(dragonCanvas);
+      }
+
+      if (!prefersReducedMotion && dragon) {
+        let bottomDragonPlayed = false;
+
+        const playDragonFlight = (mode = "top") => {
+          dragon.classList.remove("is-flying-top", "is-flying-bottom", "dragon-runner--bottom");
+
+          if (mode === "bottom") {
+            dragon.classList.add("dragon-runner--bottom");
+          }
+
+          dragon.getBoundingClientRect();
+          dragon.classList.add(mode === "bottom" ? "is-flying-bottom" : "is-flying-top");
+        };
+
+        dragon.addEventListener("animationend", () => {
+          dragon.classList.remove("is-flying-top", "is-flying-bottom", "dragon-runner--bottom");
+        });
+
+        const launchTopDragon = () => {
+          if (window.scrollY < window.innerHeight * 0.45) {
+            playDragonFlight("top");
+          }
+        };
+
+        const checkBottomDragon = () => {
+          const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+          const distanceFromBottom = scrollable - window.scrollY;
+          const triggerDistance = Math.max(240, window.innerHeight * 0.18);
+
+          if (!bottomDragonPlayed && distanceFromBottom < triggerDistance) {
+            bottomDragonPlayed = true;
+            playDragonFlight("bottom");
+          }
+
+          if (bottomDragonPlayed && distanceFromBottom > window.innerHeight * 0.72) {
+            bottomDragonPlayed = false;
+          }
+        };
+
+        window.setTimeout(launchTopDragon, 680);
+        window.addEventListener("scroll", checkBottomDragon, { passive: true });
+        window.addEventListener("resize", checkBottomDragon);
+        checkBottomDragon();
+      }
+
+      const narrationButton = document.querySelector("[data-narration-button]");
+      const narrationLabel = document.querySelector("[data-narration-label]");
+      const narrationStatus = document.querySelector("[data-narration-status]");
+      const narrationAudio = document.querySelector("[data-narration-audio]");
+      const narrationIcon = narrationButton?.querySelector(".narration-button__icon");
+      const speech = window.speechSynthesis;
+      let narrationQueue = [];
+      let narrationIndex = 0;
+      let isNarrating = false;
+      let isFallbackSpeech = false;
+
+      const getOverviewNarrationText = () => {
+        const overview = document.querySelector("#overview");
+        if (!overview) return "";
+
+        const parts = [
+          overview.querySelector("#overview-title")?.textContent,
+          overview.querySelector(".overview__lead")?.textContent,
+          ...[...overview.querySelectorAll(".overview__body p")].map((paragraph) => paragraph.textContent),
+          "Các chỉ số chính sau sáp nhập: diện tích tự nhiên 11.859,59 ki lô mét vuông; dân số 3.065.628 người; chính thức vận hành từ ngày 01 tháng 07 năm 2025."
+        ];
+
+        return parts
+          .filter(Boolean)
+          .map((part) => part.replace(/\s+/g, " ").trim())
+          .join(" ");
+      };
+
+      const splitNarrationText = (text) => {
+        const sentences = text.match(/[^.!?。]+[.!?。]?/g) || [text];
+        const chunks = [];
+        let current = "";
+
+        sentences.forEach((sentence) => {
+          const cleanSentence = sentence.trim();
+          if (!cleanSentence) return;
+
+          if (`${current} ${cleanSentence}`.trim().length > 220 && current) {
+            chunks.push(current);
+            current = cleanSentence;
+            return;
+          }
+
+          current = `${current} ${cleanSentence}`.trim();
+        });
+
+        if (current) chunks.push(current);
+        return chunks;
+      };
+
+      const getVietnameseVoice = () => {
+        if (!speech) return null;
+        const voices = speech.getVoices();
+        return (
+          voices.find((voice) => voice.lang?.toLowerCase() === "vi-vn") ||
+          voices.find((voice) => voice.lang?.toLowerCase().startsWith("vi")) ||
+          voices.find((voice) => voice.name?.toLowerCase().includes("vietnam")) ||
+          null
+        );
+      };
+
+      const setNarrationState = (state) => {
+        if (!narrationButton || !narrationLabel || !narrationStatus || !narrationIcon) return;
+
+        const speaking = state === "speaking" || state === "fallback";
+        isNarrating = speaking;
+        narrationButton.setAttribute("aria-pressed", String(speaking));
+        narrationLabel.textContent = speaking ? "Stop" : "Start";
+        narrationIcon.textContent = speaking ? "■" : "▶";
+
+        if (state === "unsupported") {
+          narrationButton.disabled = true;
+          narrationLabel.textContent = "Unavailable";
+          narrationIcon.textContent = "×";
+          narrationStatus.textContent = "Trình duyệt này chưa hỗ trợ phát hoặc đọc giọng nói.";
+          return;
+        }
+
+        if (state === "fallback") {
+          narrationStatus.textContent = `Đang đọc bằng giọng Việt của trình duyệt ${narrationIndex + 1}/${narrationQueue.length}`;
+          return;
+        }
+
+        narrationStatus.textContent = speaking ? "Đang phát giọng Việt" : "Giọng Việt sẵn sàng";
+      };
+
+      const stopNarration = () => {
+        if (narrationAudio) {
+          narrationAudio.pause();
+          narrationAudio.currentTime = 0;
+        }
+        if (speech) speech.cancel();
+        narrationQueue = [];
+        narrationIndex = 0;
+        isFallbackSpeech = false;
+        setNarrationState("idle");
+      };
+
+      const speakNextChunk = () => {
+        if (!speech || !isNarrating || !isFallbackSpeech) return;
+
+        if (narrationIndex >= narrationQueue.length) {
+          setNarrationState("idle");
+          narrationIndex = 0;
+          isFallbackSpeech = false;
+          return;
+        }
+
+        setNarrationState("fallback");
+        const utterance = new SpeechSynthesisUtterance(narrationQueue[narrationIndex]);
+        utterance.lang = "vi-VN";
+        utterance.rate = 0.92;
+        utterance.pitch = 0.96;
+        utterance.voice = getVietnameseVoice();
+        utterance.onend = () => {
+          narrationIndex += 1;
+          speakNextChunk();
+        };
+        utterance.onerror = () => stopNarration();
+
+        speech.speak(utterance);
+      };
+
+      const startFallbackNarration = () => {
+        if (!speech) {
+          setNarrationState("unsupported");
+          return;
+        }
+
+        speech.cancel();
+        narrationQueue = splitNarrationText(getOverviewNarrationText());
+        narrationIndex = 0;
+
+        if (!narrationQueue.length) return;
+
+        isNarrating = true;
+        isFallbackSpeech = true;
+        speakNextChunk();
+      };
+
+      const startNarration = async () => {
+        if (narrationAudio) {
+          try {
+            if (speech) speech.cancel();
+            isFallbackSpeech = false;
+            narrationAudio.currentTime = 0;
+            await narrationAudio.play();
+            setNarrationState("speaking");
+            return;
+          } catch (error) {
+            startFallbackNarration();
+            return;
+          }
+        }
+
+        startFallbackNarration();
+      };
+
+      if (narrationButton) {
+        if (!narrationAudio && !speech) {
+          setNarrationState("unsupported");
+        } else {
+          narrationButton.addEventListener("click", () => {
+            if (isNarrating || speech?.speaking || !narrationAudio?.paused) {
+              stopNarration();
+              return;
+            }
+
+            startNarration();
+          });
+
+          if (narrationAudio) {
+            narrationAudio.addEventListener("play", () => setNarrationState("speaking"));
+            narrationAudio.addEventListener("ended", () => setNarrationState("idle"));
+            narrationAudio.addEventListener("error", startFallbackNarration);
+          }
+
+          speech?.addEventListener?.("voiceschanged", getVietnameseVoice);
+          window.addEventListener("pagehide", stopNarration);
+        }
+      }
+
+      const adminTabs = [...document.querySelectorAll("[data-admin-tab]")];
+      const adminPanels = [...document.querySelectorAll("[data-admin-panel]")];
+
+      const setActiveAdminPanel = (target) => {
+        adminTabs.forEach((tab) => {
+          const isActive = tab.dataset.adminTab === target;
+          tab.classList.toggle("is-active", isActive);
+          tab.setAttribute("aria-selected", String(isActive));
+          tab.tabIndex = isActive ? 0 : -1;
+        });
+
+        adminPanels.forEach((panel) => {
+          const isActive = panel.dataset.adminPanel === target;
+          panel.hidden = !isActive;
+          panel.classList.toggle("is-visible", isActive);
+        });
+      };
+
+      adminTabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => setActiveAdminPanel(tab.dataset.adminTab));
+        tab.addEventListener("keydown", (event) => {
+          if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+          event.preventDefault();
+          const direction = event.key === "ArrowRight" ? 1 : -1;
+          const nextIndex = (index + direction + adminTabs.length) % adminTabs.length;
+          const nextTab = adminTabs[nextIndex];
+          nextTab.focus();
+          setActiveAdminPanel(nextTab.dataset.adminTab);
+        });
+      });
+
+      const ethnicTabs = [...document.querySelectorAll("[data-ethnic-tab]")];
+      const ethnicPanels = [...document.querySelectorAll("[data-ethnic-panel]")];
+
+      const setActiveEthnicPanel = (target) => {
+        ethnicTabs.forEach((tab) => {
+          const isActive = tab.dataset.ethnicTab === target;
+          tab.classList.toggle("is-active", isActive);
+          tab.setAttribute("aria-selected", String(isActive));
+          tab.tabIndex = isActive ? 0 : -1;
+        });
+
+        ethnicPanels.forEach((panel) => {
+          panel.hidden = panel.dataset.ethnicPanel !== target;
+        });
+      };
+
+      ethnicTabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => setActiveEthnicPanel(tab.dataset.ethnicTab));
+        tab.addEventListener("keydown", (event) => {
+          if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
+          event.preventDefault();
+
+          const direction = ["ArrowRight", "ArrowDown"].includes(event.key) ? 1 : -1;
+          const nextIndex =
+            event.key === "Home" ? 0 : event.key === "End" ? ethnicTabs.length - 1 : (index + direction + ethnicTabs.length) % ethnicTabs.length;
+          const nextTab = ethnicTabs[nextIndex];
+
+          nextTab.focus();
+          setActiveEthnicPanel(nextTab.dataset.ethnicTab);
+        });
+      });
+
+      const provinceData = {
+        "tuyen-quang": {
+          name: "Tuyên Quang",
+          region: "Miền Bắc",
+          status: "Sáp nhập mới",
+          area: "13.795,50 km²",
+          population: "1,87 triệu người",
+          density: "135 người/km²",
+          former: "Hà Giang + Tuyên Quang cũ",
+          zones: ["Tân Trào", "Hà Giang", "Đồng Văn", "Hoàng Su Phì", "Na Hang"],
+          ethnic: [["Kinh", 49], ["Tày", 25], ["Dao", 12], ["H'Mông", 9]],
+          highlights: [
+            ["🏔️", "Du lịch", "Cao nguyên đá, ruộng bậc thang, hồ Na Hang."],
+            ["🌿", "Kinh tế", "Lâm nghiệp, nông nghiệp đặc sản, kinh tế cửa khẩu."],
+            ["🎭", "Văn hóa", "Không gian Tày, Dao, H'Mông và căn cứ cách mạng."]
+          ]
+        },
+        "lao-cai": {
+          name: "Lào Cai",
+          region: "Miền Bắc",
+          status: "Sáp nhập mới",
+          area: "13.256,92 km²",
+          population: "1,78 triệu người",
+          density: "134 người/km²",
+          former: "Yên Bái + Lào Cai cũ",
+          zones: ["Sa Pa", "Yên Bái", "Mù Cang Chải", "Bảo Hà", "Lào Cai"],
+          ethnic: [["Kinh", 45], ["Tày", 16], ["H'Mông", 15], ["Dao", 12]],
+          highlights: [
+            ["⛰️", "Du lịch", "Fansipan, Sa Pa và ruộng bậc thang miền núi."],
+            ["🚆", "Kinh tế", "Cửa khẩu, logistics và hành lang kinh tế phía bắc."],
+            ["🧵", "Văn hóa", "Chợ vùng cao, thổ cẩm, lễ hội cộng đồng."]
+          ]
+        },
+        "thai-nguyen": {
+          name: "Thái Nguyên",
+          region: "Miền Bắc",
+          status: "Sáp nhập mới",
+          area: "8.375,21 km²",
+          population: "1,80 triệu người",
+          density: "215 người/km²",
+          former: "Bắc Kạn + Thái Nguyên cũ",
+          zones: ["Thái Nguyên", "Bắc Kạn", "Hồ Ba Bể", "Định Hóa"],
+          ethnic: [["Kinh", 70], ["Tày", 12], ["Nùng", 6], ["Dao", 5]],
+          highlights: [
+            ["🍃", "Du lịch", "Hồ Ba Bể, ATK Định Hóa và vùng chè Tân Cương."],
+            ["🏭", "Kinh tế", "Công nghiệp, giáo dục đại học, chế biến chè."],
+            ["🏛️", "Văn hóa", "Không gian Việt Bắc và di tích cách mạng."]
+          ]
+        },
+        "phu-tho": {
+          name: "Phú Thọ",
+          region: "Miền Bắc",
+          status: "Sáp nhập mới",
+          area: "9.361,38 km²",
+          population: "4,02 triệu người",
+          density: "430 người/km²",
+          former: "Vĩnh Phúc + Hòa Bình + Phú Thọ cũ",
+          zones: ["Việt Trì", "Vĩnh Yên", "Hòa Bình", "Đền Hùng", "Mai Châu"],
+          ethnic: [["Kinh", 72], ["Mường", 18], ["Dao", 4], ["Tày", 3]],
+          highlights: [
+            ["🏞️", "Du lịch", "Đền Hùng, hồ Hòa Bình và thung lũng Mai Châu."],
+            ["🏭", "Kinh tế", "Công nghiệp phụ trợ, du lịch văn hóa, nông nghiệp."],
+            ["🔥", "Văn hóa", "Tín ngưỡng thờ cúng Hùng Vương và văn hóa Mường."]
+          ]
+        },
+        "bac-ninh": {
+          name: "Bắc Ninh",
+          region: "Miền Bắc",
+          status: "Sáp nhập mới",
+          area: "4.718,60 km²",
+          population: "3,62 triệu người",
+          density: "767 người/km²",
+          former: "Bắc Giang + Bắc Ninh cũ",
+          zones: ["Bắc Ninh", "Bắc Giang", "Kinh Bắc", "Yên Thế"],
+          ethnic: [["Kinh", 93], ["Nùng", 2], ["Tày", 2], ["Khác", 3]],
+          highlights: [
+            ["🎶", "Du lịch", "Quan họ, chùa Dâu, làng cổ và không gian Kinh Bắc."],
+            ["💻", "Kinh tế", "Điện tử, công nghiệp chế biến, chuỗi cung ứng."],
+            ["🎭", "Văn hóa", "Dân ca Quan họ và các làng nghề truyền thống."]
+          ]
+        },
+        "hung-yen": {
+          name: "Hưng Yên",
+          region: "Miền Bắc",
+          status: "Sáp nhập mới",
+          area: "2.514,81 km²",
+          population: "3,57 triệu người",
+          density: "1.419 người/km²",
+          former: "Thái Bình + Hưng Yên cũ",
+          zones: ["Phố Hiến", "Thái Bình", "Văn Giang", "Tiền Hải"],
+          ethnic: [["Kinh", 98], ["Khác", 2]],
+          highlights: [
+            ["🌾", "Du lịch", "Phố Hiến, làng nghề, vùng lúa và không gian ven biển."],
+            ["🏭", "Kinh tế", "Công nghiệp vệ tinh Hà Nội, nông nghiệp, cảng biển."],
+            ["🏮", "Văn hóa", "Di sản Phố Hiến và văn minh châu thổ sông Hồng."]
+          ]
+        },
+        "hai-phong": {
+          name: "Hải Phòng",
+          region: "Thành phố trực thuộc Trung ương",
+          status: "Sáp nhập mới",
+          area: "3.194,72 km²",
+          population: "4,66 triệu người",
+          density: "1.460 người/km²",
+          former: "Hải Phòng + Hải Dương cũ",
+          zones: ["Cát Bà", "Đồ Sơn", "Hải Dương", "Chí Linh", "Cảng Lạch Huyện"],
+          ethnic: [["Kinh", 97], ["Hoa", 1], ["Khác", 2]],
+          highlights: [
+            ["🏝️", "Du lịch", "Cát Bà, Đồ Sơn và không gian sông nước Đông Bắc."],
+            ["⚓", "Kinh tế", "Cảng biển, logistics, công nghiệp ô tô và điện tử."],
+            ["🥁", "Văn hóa", "Văn hóa cảng, lễ hội chọi trâu, bánh đa cua."]
+          ]
+        },
+        "ninh-binh": {
+          name: "Ninh Bình",
+          region: "Miền Bắc",
+          status: "Sáp nhập mới",
+          area: "3.942,62 km²",
+          population: "4,41 triệu người",
+          density: "1.119 người/km²",
+          former: "Hà Nam + Nam Định + Ninh Bình cũ",
+          zones: ["Tràng An", "Nam Định", "Phủ Lý", "Tam Chúc", "Cố đô Hoa Lư"],
+          ethnic: [["Kinh", 96], ["Mường", 2], ["Khác", 2]],
+          highlights: [
+            ["⛩️", "Du lịch", "Tràng An, Tam Chúc, Phủ Dầy và biển Quất Lâm."],
+            ["🏭", "Kinh tế", "Công nghiệp hỗ trợ, du lịch di sản, nông nghiệp."],
+            ["🎎", "Văn hóa", "Hát văn, cố đô Hoa Lư và văn hóa đồng bằng."]
+          ]
+        },
+        "quang-tri": {
+          name: "Quảng Trị",
+          region: "Miền Trung",
+          status: "Sáp nhập mới",
+          area: "12.700 km²",
+          population: "1,87 triệu người",
+          density: "147 người/km²",
+          former: "Quảng Bình + Quảng Trị cũ",
+          zones: ["Đồng Hới", "Đông Hà", "Phong Nha", "Khe Sanh", "Cửa Tùng"],
+          ethnic: [["Kinh", 88], ["Bru - Vân Kiều", 6], ["Chứt", 2], ["Khác", 4]],
+          highlights: [
+            ["🕊️", "Du lịch", "Phong Nha, Vĩ tuyến 17, biển Nhật Lệ và Cửa Tùng."],
+            ["🌉", "Kinh tế", "Hành lang Đông - Tây, năng lượng và du lịch."],
+            ["📜", "Văn hóa", "Di tích chiến tranh, văn hóa Bru - Vân Kiều."]
+          ]
+        },
+        "da-nang": {
+          name: "Đà Nẵng",
+          region: "Thành phố trực thuộc Trung ương",
+          status: "Sáp nhập mới",
+          area: "11.859,59 km²",
+          population: "3,07 triệu người",
+          density: "258 người/km²",
+          former: "Đà Nẵng + Quảng Nam cũ",
+          zones: ["Sông Hàn", "Hội An", "Mỹ Sơn", "Cù Lao Chàm", "Tây Giang"],
+          ethnic: [["Kinh", 92], ["Cơ Tu", 4], ["Xơ Đăng", 2], ["Hoa & Chăm", 2]],
+          highlights: [
+            ["🌉", "Du lịch", "Cầu Rồng, Mỹ Khê, Hội An, Mỹ Sơn và Bà Nà."],
+            ["💡", "Kinh tế", "Đô thị biển, cảng, công nghệ, du lịch và dịch vụ."],
+            ["🏺", "Văn hóa", "Di sản Chăm Pa, thương cảng Hội An và văn hóa Cơ Tu."]
+          ]
+        },
+        "quang-ngai": {
+          name: "Quảng Ngãi",
+          region: "Miền Trung",
+          status: "Sáp nhập mới",
+          area: "14.832,55 km²",
+          population: "2,16 triệu người",
+          density: "146 người/km²",
+          former: "Kon Tum + Quảng Ngãi cũ",
+          zones: ["Lý Sơn", "Dung Quất", "Kon Tum", "Măng Đen", "Sa Huỳnh"],
+          ethnic: [["Kinh", 76], ["Xơ Đăng", 10], ["Hrê", 6], ["Ba Na", 5]],
+          highlights: [
+            ["🏝️", "Du lịch", "Lý Sơn, Măng Đen, Sa Huỳnh và rừng Trường Sơn."],
+            ["🏭", "Kinh tế", "Lọc hóa dầu, cảng biển, nông lâm nghiệp cao nguyên."],
+            ["🔥", "Văn hóa", "Văn hóa Sa Huỳnh, cồng chiêng và cộng đồng miền núi."]
+          ]
+        },
+        "gia-lai": {
+          name: "Gia Lai",
+          region: "Miền Trung",
+          status: "Sáp nhập mới",
+          area: "21.576,53 km²",
+          population: "3,58 triệu người",
+          density: "166 người/km²",
+          former: "Bình Định + Gia Lai cũ",
+          zones: ["Pleiku", "Quy Nhơn", "Tây Sơn", "Biển Nhơn Lý", "Biển Hồ"],
+          ethnic: [["Kinh", 68], ["Jrai", 13], ["Ba Na", 9], ["Khác", 10]],
+          highlights: [
+            ["🌊", "Du lịch", "Biển Quy Nhơn, cao nguyên Pleiku và tháp Chăm."],
+            ["☕", "Kinh tế", "Cà phê, năng lượng, cảng biển và logistics miền Trung."],
+            ["🥁", "Văn hóa", "Tây Sơn, cồng chiêng và văn hóa Chăm Bình Định."]
+          ]
+        },
+        "khanh-hoa": {
+          name: "Khánh Hòa",
+          region: "Miền Trung",
+          status: "Sáp nhập mới",
+          area: "8.555,86 km²",
+          population: "2,24 triệu người",
+          density: "262 người/km²",
+          former: "Ninh Thuận + Khánh Hòa cũ",
+          zones: ["Nha Trang", "Cam Ranh", "Phan Rang", "Vĩnh Hy", "Ninh Chữ"],
+          ethnic: [["Kinh", 82], ["Chăm", 8], ["Raglai", 6], ["Khác", 4]],
+          highlights: [
+            ["🏖️", "Du lịch", "Nha Trang, Vĩnh Hy, Ninh Chữ và vịnh Cam Ranh."],
+            ["⚓", "Kinh tế", "Du lịch biển, cảng nước sâu, năng lượng tái tạo."],
+            ["🕌", "Văn hóa", "Di sản Chăm, lễ hội biển và văn hóa duyên hải."]
+          ]
+        },
+        "lam-dong": {
+          name: "Lâm Đồng",
+          region: "Miền Trung",
+          status: "Sáp nhập mới",
+          area: "24.233,07 km²",
+          population: "3,87 triệu người",
+          density: "160 người/km²",
+          former: "Đắk Nông + Bình Thuận + Lâm Đồng cũ",
+          zones: ["Đà Lạt", "Mũi Né", "Bảo Lộc", "Gia Nghĩa", "Phan Thiết"],
+          ethnic: [["Kinh", 76], ["K'Ho", 6], ["Mạ", 4], ["Chăm & Raglai", 4]],
+          highlights: [
+            ["🌲", "Du lịch", "Đà Lạt, Mũi Né, hồ Tà Đùng và đồi chè Bảo Lộc."],
+            ["🍇", "Kinh tế", "Nông nghiệp công nghệ cao, du lịch, năng lượng."],
+            ["🧺", "Văn hóa", "Văn hóa Tây Nguyên, Chăm và không gian biển."]
+          ]
+        },
+        "dak-lak": {
+          name: "Đắk Lắk",
+          region: "Miền Trung",
+          status: "Sáp nhập mới",
+          area: "18.096,40 km²",
+          population: "3,35 triệu người",
+          density: "185 người/km²",
+          former: "Phú Yên + Đắk Lắk cũ",
+          zones: ["Buôn Ma Thuột", "Tuy Hòa", "Buôn Đôn", "Gành Đá Đĩa", "Sông Hinh"],
+          ethnic: [["Kinh", 70], ["Ê Đê", 12], ["M'Nông", 5], ["Chăm & Ba Na", 4]],
+          highlights: [
+            ["☕", "Du lịch", "Thủ phủ cà phê, Buôn Đôn, biển Phú Yên."],
+            ["🌽", "Kinh tế", "Cà phê, cao su, nông nghiệp và kinh tế biển."],
+            ["🎶", "Văn hóa", "Cồng chiêng, sử thi Ê Đê và đá bazan."]
+          ]
+        },
+        "ho-chi-minh": {
+          name: "TP. Hồ Chí Minh",
+          region: "Thành phố trực thuộc Trung ương",
+          status: "Sáp nhập mới",
+          area: "6.772,59 km²",
+          population: "14,00 triệu người",
+          density: "2.068 người/km²",
+          former: "TP.HCM + Bà Rịa - Vũng Tàu + Bình Dương cũ",
+          zones: ["Sài Gòn", "Thủ Đức", "Bình Dương", "Vũng Tàu", "Côn Đảo"],
+          ethnic: [["Kinh", 92], ["Hoa", 5], ["Khmer", 1], ["Khác", 2]],
+          highlights: [
+            ["🏙️", "Du lịch", "Đô thị Sài Gòn, biển Vũng Tàu và Côn Đảo."],
+            ["💼", "Kinh tế", "Tài chính, công nghiệp, cảng biển và đổi mới sáng tạo."],
+            ["🍜", "Văn hóa", "Giao thoa Nam Bộ, người Hoa, đô thị và biển đảo."]
+          ]
+        },
+        "dong-nai": {
+          name: "Đồng Nai",
+          region: "Miền Nam",
+          status: "Sáp nhập mới",
+          area: "12.737,18 km²",
+          population: "4,49 triệu người",
+          density: "353 người/km²",
+          former: "Bình Phước + Đồng Nai cũ",
+          zones: ["Biên Hòa", "Long Khánh", "Đồng Xoài", "Cát Tiên", "Trị An"],
+          ethnic: [["Kinh", 86], ["S'Tiêng", 4], ["Hoa", 3], ["Khác", 7]],
+          highlights: [
+            ["🌳", "Du lịch", "Cát Tiên, hồ Trị An và các vườn cây Nam Bộ."],
+            ["🏭", "Kinh tế", "Công nghiệp, logistics, sân bay Long Thành."],
+            ["🪵", "Văn hóa", "Không gian Đông Nam Bộ và cộng đồng S'Tiêng."]
+          ]
+        },
+        "tay-ninh": {
+          name: "Tây Ninh",
+          region: "Miền Nam",
+          status: "Sáp nhập mới",
+          area: "8.536,44 km²",
+          population: "3,25 triệu người",
+          density: "381 người/km²",
+          former: "Long An + Tây Ninh cũ",
+          zones: ["Núi Bà Đen", "Long An", "Mộc Bài", "Tân An", "Vàm Cỏ"],
+          ethnic: [["Kinh", 93], ["Khmer", 3], ["Hoa", 2], ["Khác", 2]],
+          highlights: [
+            ["⛰️", "Du lịch", "Núi Bà Đen, Tòa thánh Cao Đài và sông Vàm Cỏ."],
+            ["🚚", "Kinh tế", "Cửa khẩu, công nghiệp, nông nghiệp và logistics."],
+            ["🕍", "Văn hóa", "Cao Đài, văn hóa biên giới và Nam Bộ."]
+          ]
+        },
+        "can-tho": {
+          name: "Cần Thơ",
+          region: "Thành phố trực thuộc Trung ương",
+          status: "Sáp nhập mới",
+          area: "6.360,83 km²",
+          population: "4,20 triệu người",
+          density: "660 người/km²",
+          former: "Cần Thơ + Sóc Trăng + Hậu Giang cũ",
+          zones: ["Ninh Kiều", "Cái Răng", "Sóc Trăng", "Vị Thanh", "Trần Đề"],
+          ethnic: [["Kinh", 83], ["Khmer", 12], ["Hoa", 3], ["Khác", 2]],
+          highlights: [
+            ["🛶", "Du lịch", "Chợ nổi Cái Răng, miệt vườn và văn hóa Khmer."],
+            ["🌾", "Kinh tế", "Trung tâm logistics, nông nghiệp và thủy sản ĐBSCL."],
+            ["🏮", "Văn hóa", "Đờn ca tài tử, chùa Khmer và chợ nổi."]
+          ]
+        },
+        "vinh-long": {
+          name: "Vĩnh Long",
+          region: "Miền Nam",
+          status: "Sáp nhập mới",
+          area: "6.296,20 km²",
+          population: "4,26 triệu người",
+          density: "676 người/km²",
+          former: "Bến Tre + Trà Vinh + Vĩnh Long cũ",
+          zones: ["Vĩnh Long", "Bến Tre", "Trà Vinh", "Cù lao An Bình", "Ba Tri"],
+          ethnic: [["Kinh", 82], ["Khmer", 12], ["Hoa", 3], ["Khác", 3]],
+          highlights: [
+            ["🌴", "Du lịch", "Cù lao, vườn trái cây, xứ dừa và biển Ba Động."],
+            ["🥥", "Kinh tế", "Dừa, trái cây, thủy sản và kinh tế sông nước."],
+            ["🎼", "Văn hóa", "Đờn ca tài tử, chùa Khmer và làng nghề."]
+          ]
+        },
+        "dong-thap": {
+          name: "Đồng Tháp",
+          region: "Miền Nam",
+          status: "Sáp nhập mới",
+          area: "5.938,64 km²",
+          population: "4,37 triệu người",
+          density: "736 người/km²",
+          former: "Tiền Giang + Đồng Tháp cũ",
+          zones: ["Sa Đéc", "Cao Lãnh", "Mỹ Tho", "Gò Công", "Tràm Chim"],
+          ethnic: [["Kinh", 95], ["Hoa", 2], ["Khmer", 1], ["Khác", 2]],
+          highlights: [
+            ["🌺", "Du lịch", "Tràm Chim, làng hoa Sa Đéc, miệt vườn Tiền Giang."],
+            ["🌾", "Kinh tế", "Lúa gạo, trái cây, thủy sản và cửa ngõ Mekong."],
+            ["🎶", "Văn hóa", "Đờn ca tài tử, văn hóa sông Tiền và Đồng Tháp Mười."]
+          ]
+        },
+        "ca-mau": {
+          name: "Cà Mau",
+          region: "Miền Nam",
+          status: "Sáp nhập mới",
+          area: "7.942,39 km²",
+          population: "2,61 triệu người",
+          density: "328 người/km²",
+          former: "Bạc Liêu + Cà Mau cũ",
+          zones: ["Mũi Cà Mau", "Bạc Liêu", "U Minh", "Năm Căn", "Gành Hào"],
+          ethnic: [["Kinh", 86], ["Khmer", 7], ["Hoa", 3], ["Khác", 4]],
+          highlights: [
+            ["🌊", "Du lịch", "Mũi Cà Mau, rừng U Minh, nhà công tử Bạc Liêu."],
+            ["🦐", "Kinh tế", "Tôm, thủy sản, năng lượng gió và kinh tế biển."],
+            ["🎵", "Văn hóa", "Đờn ca tài tử, văn hóa Khmer và miền đất cuối trời."]
+          ]
+        },
+        "an-giang": {
+          name: "An Giang",
+          region: "Miền Nam",
+          status: "Sáp nhập mới",
+          area: "9.888,91 km²",
+          population: "4,95 triệu người",
+          density: "501 người/km²",
+          former: "Kiên Giang + An Giang cũ",
+          zones: ["Châu Đốc", "Long Xuyên", "Rạch Giá", "Phú Quốc", "Hà Tiên"],
+          ethnic: [["Kinh", 82], ["Khmer", 8], ["Hoa", 4], ["Chăm", 3]],
+          highlights: [
+            ["🏝️", "Du lịch", "Phú Quốc, Hà Tiên, Núi Sam và rừng tràm Trà Sư."],
+            ["🐟", "Kinh tế", "Lúa gạo, thủy sản, du lịch biển đảo và biên mậu."],
+            ["🕌", "Văn hóa", "Chăm Islam, Khmer Nam Bộ và lễ hội Bà Chúa Xứ."]
+          ]
+        },
+        "ha-noi": {
+          name: "Hà Nội",
+          region: "Thành phố trực thuộc Trung ương",
+          status: "Giữ nguyên",
+          area: "Đang cập nhật...",
+          population: "Đang cập nhật...",
+          density: "Đang cập nhật...",
+          former: "Không sáp nhập",
+          zones: ["Hoàn Kiếm", "Ba Đình", "Tây Hồ", "Sơn Tây", "Sóc Sơn"],
+          ethnic: [["Kinh", 98], ["Khác", 2]],
+          highlights: [
+            ["🏛️", "Du lịch", "Phố cổ, Hồ Gươm, Hoàng thành Thăng Long."],
+            ["💼", "Kinh tế", "Trung tâm chính trị, tài chính, giáo dục."],
+            ["🎭", "Văn hóa", "Kinh kỳ, làng nghề, ẩm thực và di sản đô thị."]
+          ]
+        },
+        "hue": {
+          name: "Huế",
+          region: "Thành phố trực thuộc Trung ương",
+          status: "Giữ nguyên",
+          area: "Đang cập nhật...",
+          population: "Đang cập nhật...",
+          density: "Đang cập nhật...",
+          former: "Không sáp nhập",
+          zones: ["Kinh thành Huế", "Lăng tẩm", "Phá Tam Giang", "A Lưới"],
+          ethnic: [["Kinh", 92], ["Tà Ôi", 3], ["Cơ Tu", 2], ["Khác", 3]],
+          highlights: [
+            ["🏯", "Du lịch", "Quần thể di tích cố đô, sông Hương, phá Tam Giang."],
+            ["🎨", "Kinh tế", "Du lịch di sản, y tế, giáo dục và dịch vụ."],
+            ["🎼", "Văn hóa", "Nhã nhạc cung đình, áo dài, ẩm thực Huế."]
+          ]
+        },
+        "cao-bang": placeholderProvince("Cao Bằng", "Miền Bắc"),
+        "dien-bien": placeholderProvince("Điện Biên", "Miền Bắc"),
+        "ha-tinh": placeholderProvince("Hà Tĩnh", "Miền Trung"),
+        "lai-chau": placeholderProvince("Lai Châu", "Miền Bắc"),
+        "lang-son": placeholderProvince("Lạng Sơn", "Miền Bắc"),
+        "nghe-an": placeholderProvince("Nghệ An", "Miền Trung"),
+        "quang-ninh": placeholderProvince("Quảng Ninh", "Miền Bắc"),
+        "thanh-hoa": placeholderProvince("Thanh Hóa", "Miền Bắc"),
+        "son-la": placeholderProvince("Sơn La", "Miền Bắc")
+      };
+
+      function placeholderProvince(name, region) {
+        return {
+          name,
+          region,
+          status: "Giữ nguyên",
+          area: "Đang cập nhật...",
+          population: "Đang cập nhật...",
+          density: "Đang cập nhật...",
+          former: "Không sáp nhập",
+          zones: ["Đang cập nhật..."],
+          ethnic: [["Đang cập nhật", 100]],
+          highlights: [
+            ["🧭", "Du lịch", "Đang cập nhật dữ liệu điểm đến tiêu biểu."],
+            ["🏭", "Kinh tế", "Đang cập nhật dữ liệu kinh tế nổi bật."],
+            ["🎭", "Văn hóa", "Đang cập nhật dữ liệu văn hóa địa phương."]
+          ]
+        };
+      }
+
+      const provinceDetail = document.querySelector("#province-detail");
+      const provinceDetailInner = document.querySelector("#province-detail .province-detail__inner");
+      const provinceTargets = [...document.querySelectorAll("[data-province]")];
+
+      const escapeHtml = (value) =>
+        String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
+
+      const renderTags = (items) => items.map((item) => `<span class="detail-tag">${escapeHtml(item)}</span>`).join("");
+
+      const renderEthnicBars = (items) =>
+        items
+          .map(
+            ([label, value]) => `
+              <div class="ethnic-bar">
+                <div class="ethnic-bar__row"><span>${escapeHtml(label)}</span><span>${value}%</span></div>
+                <div class="ethnic-bar__track"><span class="ethnic-bar__fill" style="width: ${Math.max(0, Math.min(100, value))}%"></span></div>
+              </div>
+            `
+          )
+          .join("");
+
+      const renderHighlights = (items) =>
+        items
+          .map(
+            ([icon, title, text]) => `
+              <div class="highlight-card">
+                <span class="highlight-card__icon" aria-hidden="true">${icon}</span>
+                <span class="highlight-card__title">${escapeHtml(title)}</span>
+                <span class="highlight-card__text">${escapeHtml(text)}</span>
+              </div>
+            `
+          )
+          .join("");
+
+      const renderProvinceDetail = (province) => {
+        provinceDetailInner.innerHTML = `
+          <header class="province-detail__header">
+            <div class="province-detail__meta">
+              <span>📍 ${escapeHtml(province.region)}</span>
+              <span class="status-badge">${escapeHtml(province.status)}</span>
+            </div>
+            <h3 class="province-detail__title">${escapeHtml(province.name)}</h3>
+          </header>
+
+          <div class="detail-grid" aria-label="Thông tin tổng hợp">
+            <div class="detail-metric">
+              <span class="detail-metric__label">Diện tích</span>
+              <span class="detail-metric__value">${escapeHtml(province.area)}</span>
+            </div>
+            <div class="detail-metric">
+              <span class="detail-metric__label">Dân số</span>
+              <span class="detail-metric__value">${escapeHtml(province.population)}</span>
+            </div>
+            <div class="detail-metric">
+              <span class="detail-metric__label">Mật độ</span>
+              <span class="detail-metric__value">${escapeHtml(province.density)}</span>
+            </div>
+            <div class="detail-metric detail-metric--text">
+              <span class="detail-metric__label">Gồm các tỉnh cũ</span>
+              <span class="detail-metric__value">${escapeHtml(province.former)}</span>
+            </div>
+          </div>
+
+          <div class="detail-block">
+            <h4 class="detail-block__title">Các khu vực tiêu biểu</h4>
+            <div class="tag-list">${renderTags(province.zones)}</div>
+          </div>
+
+          <div class="detail-block">
+            <h4 class="detail-block__title">Dân tộc chủ yếu</h4>
+            <div class="ethnic-bars">${renderEthnicBars(province.ethnic)}</div>
+          </div>
+
+          <div class="detail-block">
+            <h4 class="detail-block__title">Điểm nổi bật</h4>
+            <div class="highlight-grid">${renderHighlights(province.highlights)}</div>
+          </div>
+        `;
+      };
+
+      const selectProvince = (slug, shouldScroll = true) => {
+        const province = provinceData[slug];
+        if (!province || !provinceDetail || !provinceDetailInner) return;
+
+        document.querySelectorAll(".map-province").forEach((path) => {
+          path.classList.toggle("is-selected", path.dataset.province === slug);
+        });
+        document.querySelectorAll(".province-pill").forEach((pill) => {
+          pill.classList.toggle("is-active", pill.dataset.province === slug);
+        });
+
+        provinceDetail.classList.remove("is-visible");
+        renderProvinceDetail(province);
+
+        requestAnimationFrame(() => {
+          provinceDetail.classList.add("is-visible");
+          if (shouldScroll) {
+            provinceDetail.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
+          }
+        });
+      };
+
+      provinceTargets.forEach((target) => {
+        target.addEventListener("click", () => selectProvince(target.dataset.province));
+        target.addEventListener("keydown", (event) => {
+          if (!["Enter", " "].includes(event.key)) return;
+          event.preventDefault();
+          selectProvince(target.dataset.province);
+        });
+      });
+
+      selectProvince("da-nang", false);
+    </script>
+  </body>
+</html>
