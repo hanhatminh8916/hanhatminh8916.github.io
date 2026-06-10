@@ -1117,17 +1117,19 @@
 
       .ethnic-media {
         position: relative;
-        min-height: 340px;
+        display: grid;
+        align-content: start;
         overflow: hidden;
         border: 1px solid rgba(201, 169, 110, 0.36);
         border-radius: 6px;
-        background: var(--color-navy-800);
+        background: rgba(5, 13, 26, 0.48);
       }
 
       .ethnic-media::after {
         position: absolute;
         inset: 0;
         content: "";
+        display: none;
         background:
           linear-gradient(180deg, rgba(5, 13, 26, 0.02), rgba(5, 13, 26, 0.54)),
           linear-gradient(90deg, rgba(201, 169, 110, 0.12), rgba(201, 169, 110, 0));
@@ -1136,21 +1138,16 @@
 
       .ethnic-media__image {
         width: 100%;
-        height: 100%;
-        min-height: 340px;
-        object-fit: cover;
-        transform: scale(1.02);
+        height: auto;
+        object-fit: contain;
       }
 
       .ethnic-media__caption {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        left: 0;
+        position: relative;
         z-index: 1;
         padding: 18px 20px;
         color: rgba(248, 243, 232, 0.82);
-        background: linear-gradient(180deg, rgba(5, 13, 26, 0), rgba(5, 13, 26, 0.88));
+        background: rgba(5, 13, 26, 0.82);
         font-size: 0.8rem;
         line-height: 1.64;
       }
@@ -1931,8 +1928,8 @@
         }
 
         .ethnic-panel__grid {
-          grid-template-columns: minmax(0, 0.95fr) minmax(280px, 0.78fr);
-          align-items: stretch;
+          grid-template-columns: minmax(0, 0.82fr) minmax(360px, 0.92fr);
+          align-items: start;
         }
 
         .map-section__header {
@@ -2544,11 +2541,11 @@
                   <figure class="ethnic-media">
                     <img
                       class="ethnic-media__image"
-                      src="https://upload.wikimedia.org/wikipedia/commons/6/65/Woman_wearing_Ao_Dai.jpg"
-                      alt="Phụ nữ mặc áo dài tại Hội An"
+                      src="https://special.vietnamplus.vn/wp-content/uploads/2021/03/2909aodai2-1601344550-91-1568x1226.jpg"
+                      alt="Phụ nữ Việt Nam mặc áo dài"
                       loading="lazy"
                     />
-                    <figcaption class="ethnic-media__caption">Áo dài tại Hội An, một biểu tượng thị giác quen thuộc của văn hóa Việt.</figcaption>
+                    <figcaption class="ethnic-media__caption">Áo dài, một biểu tượng thị giác quen thuộc của văn hóa Việt.</figcaption>
                   </figure>
                 </div>
               </article>
@@ -2590,11 +2587,11 @@
                   <figure class="ethnic-media">
                     <img
                       class="ethnic-media__image"
-                      src="https://upload.wikimedia.org/wikipedia/commons/1/1e/Guol_Co_Tu.png"
-                      alt="Nhà Gươl của người Cơ Tu"
+                      src="https://khetre.hue.gov.vn/Portals/73/Uploads/H57.135/Nam2025/Thang12/SoDuLich__9_.jpg"
+                      alt="Không gian văn hóa của người Cơ Tu"
                       loading="lazy"
                     />
-                    <figcaption class="ethnic-media__caption">Nhà Gươl, không gian cộng đồng trung tâm trong đời sống văn hóa Cơ Tu.</figcaption>
+                    <figcaption class="ethnic-media__caption">Không gian văn hóa Cơ Tu gắn với miền núi phía tây và đời sống cộng đồng.</figcaption>
                   </figure>
                 </div>
               </article>
@@ -2635,11 +2632,11 @@
                   <figure class="ethnic-media">
                     <img
                       class="ethnic-media__image"
-                      src="https://upload.wikimedia.org/wikipedia/commons/1/12/Trang_phuc_Xo_Dang.jpg"
-                      alt="Trang phục truyền thống của người Xơ Đăng"
+                      src="https://www.vietourist.com.vn/public/frontend/uploads/kceditor/images/frbjfbv.png"
+                      alt="Văn hóa miền núi của người Xơ Đăng và Giẻ Triêng"
                       loading="lazy"
                     />
-                    <figcaption class="ethnic-media__caption">Trang phục Xơ Đăng, gợi nhắc hệ hoa văn và màu sắc của vùng núi Trường Sơn.</figcaption>
+                    <figcaption class="ethnic-media__caption">Không gian văn hóa miền núi, gợi nhắc đời sống cộng đồng Xơ Đăng và Giẻ Triêng.</figcaption>
                   </figure>
                 </div>
               </article>
